@@ -43,7 +43,6 @@ p {
 
 img {
     display: block;
-    margin: 20px auto;
     max-width: 100%;
     height: auto;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -51,7 +50,8 @@ img {
 
 iframe {
     display: block;
-    margin: 0 auto;
+    width: 100%;
+    height: 1000px;
     border: none;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -69,16 +69,18 @@ footer p {
 
 .about-content {
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
 }
 
 .about-content img {
-    margin-right: 20px;
-    flex-shrink: 0;
+    width: 200px;
+    height: auto;
+    margin-bottom: 20px;
 }
 
 .about-text {
-    flex-grow: 1;
+    width: 100%;
 }
 
 .project h4 {
@@ -90,6 +92,22 @@ footer p {
 a, button {
     min-height: 44px;
     min-width: 44px;
+}
+
+@media screen and (min-width: 768px) {
+    .about-content {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .about-content img {
+        margin-right: 20px;
+        margin-bottom: 0;
+    }
+
+    .about-text {
+        flex-grow: 1;
+    }
 }
 
 @media screen and (max-width: 768px) {
@@ -104,15 +122,6 @@ a, button {
     main {
         padding: 10px;
         margin: 20px auto;
-    }
-    
-    .about-content {
-        flex-direction: column;
-    }
-    
-    .about-content img {
-        margin-right: 0;
-        margin-bottom: 20px;
     }
     
     iframe {
