@@ -1,33 +1,1024 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bradley D. Hutchinson - Personal Website</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bradley D. Hutchinson — Astronomy · Machine Learning</title>
+<meta name="description" content="Bradley D. Hutchinson — astronomer and machine-learning researcher. Incoming Physics & Astronomy Ph.D. at the University of Pennsylvania, DOE Computational Science Graduate Fellow.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Karla:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS — "Daylight Survey"
+   A light-mode site for a wavelength-aware astronomer.
+   Structure is keyed to the SDSS ugriz photometric bands:
+   each section carries its own filter and its own hue.
+   ============================================================ */
+:root{
+  --paper:#FCFCFA;
+  --paper-raised:#FFFFFF;
+  --ink:#1C2030;
+  --ink-soft:#4C5266;
+  --ink-faint:#8B90A1;
+  --line:#E6E6E1;
+
+  /* ugriz band hues */
+  --u:#7B5BD6;  /* 354 nm */
+  --g:#2E9E78;  /* 477 nm */
+  --r:#E08A3C;  /* 623 nm */
+  --i:#D8554A;  /* 763 nm */
+  --z:#9A4B6E;  /* 913 nm */
+
+  --display:'Spectral', Georgia, serif;
+  --body:'Karla', system-ui, sans-serif;
+  --mono:'Spline Sans Mono', ui-monospace, monospace;
+
+  --max:1060px;
+  --pad:clamp(20px,5vw,56px);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:#EDE7FB;color:var(--ink)}
+
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid var(--u);outline-offset:3px;border-radius:2px}
+
+.wrap{max-width:var(--max);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
+
+/* ---------- spectrum rule: the recurring signature ---------- */
+.spectrum{
+  height:2px;border:0;
+  background:linear-gradient(90deg,var(--u),#3D7BE0,var(--g),#C9C53A,var(--r),var(--i),var(--z));
+  opacity:.85;
+}
+
+/* ---------- nav ---------- */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  background:rgba(252,252,250,.86);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+  transition:background .35s ease,border-color .35s ease;
+}
+nav.over-hero{background:rgba(28,32,48,.35);border-bottom-color:rgba(255,255,255,.08)}
+nav.over-hero .nav-name{color:#fff}
+nav.over-hero .nav-links a{color:#B9BDCB}
+nav.over-hero .nav-links a:hover{color:#fff}
+.nav-inner{
+  max-width:var(--max);margin:0 auto;
+  padding:14px var(--pad);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.nav-name{font-family:var(--display);font-weight:500;font-size:18px;letter-spacing:.01em}
+.nav-name .dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:conic-gradient(var(--u),var(--g),var(--r),var(--i),var(--z),var(--u));
+  margin-right:9px;transform:translateY(-1px)}
+.nav-links{display:flex;gap:26px;font-size:13.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.nav-links a{color:var(--ink-soft);position:relative;padding:4px 0;transition:color .2s}
+.nav-links a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:2px;
+  background:currentColor;transition:right .25s ease}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{right:0}
+@media(max-width:720px){.nav-links{display:none}}
+
+/* ---------- hero ---------- */
+header{
+  position:relative;
+  min-height:92vh;
+  display:flex;align-items:center;
+  overflow:hidden;
+  background:var(--ink);
+}
+#sky{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-content{position:relative;z-index:2;padding-top:90px;padding-bottom:60px}
+
+.hero-eyebrow{
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;
+  color:#A6ACC0;text-transform:uppercase;
+  display:flex;align-items:center;gap:12px;margin-bottom:26px;
+  opacity:0;animation:rise .8s ease .15s forwards;
+}
+.hero-eyebrow::before{content:"";width:34px;height:2px;
+  background:linear-gradient(90deg,var(--u),var(--i))}
+
+h1{
+  font-family:var(--display);font-weight:300;
+  font-size:clamp(44px,8.2vw,92px);
+  line-height:1.02;letter-spacing:-.015em;
+  margin-bottom:8px;
+  color:#FFFFFF;
+}
+h1 .line{display:block;overflow:hidden}
+h1 .line span{display:inline-block;transform:translateY(110%);
+  animation:lift 1s cubic-bezier(.2,.7,.2,1) forwards}
+h1 .line:nth-child(2) span{animation-delay:.12s}
+h1 em{font-style:italic;font-weight:300;
+  background:linear-gradient(100deg,#A98DF2 0%,#6FA8F5 35%,#5BC79A 65%,#F0B05C 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+
+.hero-sub{
+  max-width:560px;font-size:clamp(17px,2.1vw,20px);color:#B9BDCB;
+  margin-top:22px;
+  opacity:0;animation:rise .9s ease .45s forwards;
+}
+.hero-sub strong{color:#fff;font-weight:600}
+
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px;
+  opacity:0;animation:rise .9s ease .6s forwards}
+.btn{
+  font-family:var(--body);font-weight:600;font-size:15px;
+  padding:13px 26px;border-radius:999px;border:1px solid var(--ink);
+  transition:transform .2s ease,box-shadow .2s ease,background .2s,color .2s;
+  display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+}
+.btn-solid{background:var(--ink);color:#fff}
+.btn-solid:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(28,32,48,.18)}
+.btn-ghost{background:transparent;color:var(--ink)}
+.btn-ghost:hover{transform:translateY(-2px);background:#fff;box-shadow:0 8px 20px rgba(28,32,48,.08)}
+header .btn-solid{background:#fff;color:var(--ink);border-color:#fff}
+header .btn-solid:hover{box-shadow:0 12px 28px rgba(0,0,0,.35)}
+header .btn-ghost{color:#fff;border-color:rgba(255,255,255,.55)}
+header .btn-ghost:hover{background:rgba(255,255,255,.1);border-color:#fff;box-shadow:none}
+
+.hero-meta{
+  margin-top:54px;display:flex;flex-wrap:wrap;gap:34px;
+  opacity:0;animation:rise 1s ease .75s forwards;
+}
+.hero-meta div{font-size:13.5px}
+.hero-meta .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:#7C8296;display:block;margin-bottom:3px}
+.hero-meta .v{font-weight:600;color:#fff}
+
+.scroll-cue{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:#8B90A1;
+  text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;animation:rise 1s ease 1.1s forwards;
+}
+.scroll-cue::after{content:"";width:1px;height:34px;
+  background:linear-gradient(#8B90A1,transparent);
+  animation:drip 2.2s ease-in-out infinite}
+
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes lift{to{transform:none}}
+@keyframes drip{0%,100%{transform:scaleY(.4);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}}
+
+/* ---------- sections ---------- */
+section{padding:clamp(70px,10vw,120px) 0;position:relative}
+section + section{border-top:1px solid var(--line)}
+
+.band-tag{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-soft);
+  border:1px solid var(--line);border-radius:999px;
+  padding:7px 16px;margin-bottom:22px;background:var(--paper-raised);
+}
+.band-tag .swatch{width:10px;height:10px;border-radius:50%}
+
+h2{
+  font-family:var(--display);font-weight:400;
+  font-size:clamp(30px,4.6vw,46px);line-height:1.12;letter-spacing:-.01em;
+  margin-bottom:14px;max-width:640px;
+}
+h2 em{font-style:italic}
+.section-lede{color:var(--ink-soft);max-width:580px;margin-bottom:48px;font-size:17.5px}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- about ---------- */
+.about-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:clamp(36px,6vw,80px);align-items:start}
+.about-grid p + p{margin-top:18px}
+.about-grid p{color:var(--ink-soft)}
+.about-grid p strong{color:var(--ink);font-weight:600}
+.fact-card{
+  background:var(--paper-raised);border:1px solid var(--line);border-radius:18px;
+  padding:28px;position:relative;overflow:hidden;
+}
+.fact-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--u),var(--g),var(--r),var(--i),var(--z))}
+.fact{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+.fact:last-child{border-bottom:0}
+.fact .k{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--ink-faint);text-transform:uppercase}
+.fact .v{font-weight:600;text-align:right}
+@media(max-width:820px){.about-grid{grid-template-columns:1fr}}
+
+/* ---------- education timeline ---------- */
+.timeline{position:relative;margin-top:8px}
+.timeline::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(var(--u),var(--g))}
+.t-item{position:relative;padding:0 0 44px 44px}
+.t-item:last-child{padding-bottom:0}
+.t-item::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border-radius:50%;
+  background:var(--paper);border:3px solid var(--u);transition:transform .25s ease}
+.t-item:nth-child(2)::before{border-color:var(--g)}
+.t-item:nth-child(3)::before{border-color:var(--r)}
+.t-item:hover::before{transform:scale(1.25)}
+.t-date{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase}
+.t-title{font-family:var(--display);font-size:24px;font-weight:500;margin:6px 0 4px}
+.t-sub{color:var(--ink-soft);font-size:15.5px}
+.t-detail{margin-top:12px;background:var(--paper-raised);border:1px solid var(--line);
+  border-radius:14px;padding:16px 20px;font-size:14.5px;color:var(--ink-soft)}
+.t-detail .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-faint);display:block;margin-bottom:4px}
+.t-detail em{color:var(--ink);font-style:italic;font-family:var(--display);font-size:15.5px}
+
+/* ---------- research / publication ---------- */
+.pub-card{
+  background:linear-gradient(180deg,#FFFFFF, #FBFAF7);
+  border:1px solid var(--line);border-radius:22px;
+  padding:clamp(28px,4.5vw,48px);
+  position:relative;overflow:hidden;
+  transition:box-shadow .3s ease,transform .3s ease;
+  display:grid;grid-template-columns:minmax(0,1fr) 300px;
+  gap:clamp(24px,4vw,48px);align-items:center;
+}
+.pub-card:hover{box-shadow:0 18px 50px rgba(28,32,48,.09);transform:translateY(-3px)}
+.pub-viz{display:flex;flex-direction:column;align-items:center;gap:12px}
+#gsa{width:100%;max-width:300px;height:auto;display:block}
+.pub-viz .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;
+  color:var(--ink-faint);text-transform:uppercase;text-align:center;line-height:1.7}
+.pub-viz .cap-hover{opacity:.55;transition:opacity .3s,color .3s}
+.pub-card:hover .cap-hover{opacity:1;color:var(--g)}
+@media(max-width:900px){
+  .pub-card{grid-template-columns:1fr}
+  .pub-viz{order:2;margin-top:6px}
+}
+.pub-card .glow{position:absolute;right:-90px;top:-90px;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(123,91,214,.12),transparent 70%);pointer-events:none}
+.pub-kicker{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--g);font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+.pub-kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--g)}
+.pub-title{font-family:var(--display);font-size:clamp(22px,3.2vw,30px);font-weight:500;line-height:1.25;max-width:720px}
+.pub-authors{margin-top:14px;color:var(--ink-soft);font-size:15.5px}
+.pub-authors strong{color:var(--ink)}
+.pub-ref{margin-top:6px;font-family:var(--mono);font-size:13px;color:var(--ink-faint)}
+.pub-blurb{margin-top:20px;color:var(--ink-soft);max-width:680px}
+.pub-link{display:inline-flex;align-items:center;gap:8px;margin-top:24px;font-weight:600;font-size:15px;
+  color:var(--ink);border-bottom:2px solid var(--g);padding-bottom:2px;transition:gap .2s ease}
+.pub-link:hover{gap:13px}
+
+.research-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+.r-chip{background:var(--paper-raised);border:1px solid var(--line);border-radius:16px;padding:20px 22px;
+  transition:transform .25s ease,border-color .25s ease}
+.r-chip:hover{transform:translateY(-4px);border-color:#d8d8d0}
+.r-chip h3{font-family:var(--display);font-weight:500;font-size:18px;margin-bottom:6px}
+.r-chip p{font-size:14px;color:var(--ink-soft);line-height:1.55}
+.r-chip .bar{width:30px;height:3px;border-radius:2px;margin-bottom:14px}
+@media(max-width:820px){.research-strip{grid-template-columns:1fr}}
+
+/* ---------- honors ---------- */
+.honor-feature{
+  display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;
+}
+.honor-big{
+  background:var(--paper-raised);border:1px solid var(--line);border-radius:20px;
+  padding:30px;position:relative;overflow:hidden;
+  transition:transform .25s ease,box-shadow .25s ease;
+}
+.honor-big:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(28,32,48,.08)}
+.honor-big .year{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;color:var(--ink-faint)}
+.honor-big h3{font-family:var(--display);font-size:23px;font-weight:500;margin:10px 0 6px;line-height:1.25}
+.honor-big p{font-size:14.5px;color:var(--ink-soft)}
+.honor-big::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.honor-big.hu::after{background:var(--r)}
+.honor-big.hg::after{background:var(--u)}
+.honor-list{display:grid;gap:0;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--paper-raised)}
+.honor-row{display:grid;grid-template-columns:110px 1fr auto;gap:16px;align-items:baseline;
+  padding:17px 24px;border-bottom:1px solid var(--line);transition:background .2s}
+.honor-row:last-child{border-bottom:0}
+.honor-row:hover{background:#FAFAF6}
+.honor-row .y{font-family:var(--mono);font-size:12.5px;color:var(--ink-faint)}
+.honor-row .n{font-weight:600;font-size:15.5px}
+.honor-row .o{font-size:13.5px;color:var(--ink-soft);text-align:right}
+@media(max-width:820px){
+  .honor-feature{grid-template-columns:1fr}
+  .honor-row{grid-template-columns:1fr;gap:2px}
+  .honor-row .o{text-align:left}
+}
+
+/* ---------- talks ---------- */
+.talk-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.talk{background:var(--paper-raised);border:1px solid var(--line);border-radius:18px;padding:24px;
+  transition:transform .25s ease,border-color .25s}
+.talk:hover{transform:translateY(-4px);border-color:#d8d8d0}
+.talk .where{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
+.talk .venue{font-weight:700;font-size:14px;letter-spacing:.02em}
+.talk .date{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
+.talk .title{font-family:var(--display);font-style:italic;font-size:16.5px;line-height:1.45;color:var(--ink-soft)}
+.talk .org{margin-top:12px;font-size:12.5px;font-family:var(--mono);color:var(--ink-faint);letter-spacing:.04em}
+.talk-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 10px;border-radius:999px;margin-bottom:12px}
+.tag-invited{background:#F1ECFB;color:var(--u)}
+.tag-poster{background:#EAF5F0;color:var(--g)}
+@media(max-width:820px){.talk-grid{grid-template-columns:1fr}}
+
+/* ---------- skills ---------- */
+.skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.skill-block{background:var(--paper-raised);border:1px solid var(--line);border-radius:18px;padding:26px}
+.skill-block h3{font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-faint);margin-bottom:16px;display:flex;align-items:center;gap:9px}
+.skill-block h3 .swatch{width:9px;height:9px;border-radius:50%}
+.pills{display:flex;flex-wrap:wrap;gap:9px}
+.pill{font-size:13.5px;font-weight:600;padding:7px 15px;border-radius:999px;
+  border:1px solid var(--line);background:var(--paper);
+  transition:transform .18s ease,border-color .18s,background .18s;cursor:default}
+.pill:hover{transform:translateY(-2px);border-color:var(--ink);background:#fff}
+@media(max-width:720px){.skill-grid{grid-template-columns:1fr}}
+
+/* ---------- footer / contact ---------- */
+footer{position:relative;overflow:hidden;background:var(--ink);color:#EDEEF3;
+  padding:clamp(70px,9vw,110px) 0 40px}
+footer h2{color:#fff;max-width:none}
+footer .f-lede{color:#B9BDCB;max-width:520px;margin-top:10px;margin-bottom:36px}
+.f-actions{display:flex;flex-wrap:wrap;gap:14px}
+.f-btn{border-color:#fff;color:#fff}
+.f-btn:hover{background:#fff;color:var(--ink)}
+.f-links{margin-top:56px;display:flex;flex-wrap:wrap;gap:30px;
+  font-family:var(--mono);font-size:13px;color:#9AA0B2}
+.f-links a{border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
+.f-links a:hover{color:#fff;border-color:#fff}
+.f-bottom{margin-top:50px;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  font-size:12.5px;color:#7C8296;font-family:var(--mono)}
+footer .spectrum{position:absolute;top:0;left:0;right:0;z-index:3}
+#cluster{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
+.f-content{position:relative;z-index:2}
+@media(max-width:900px){#cluster{opacity:.5}}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none}
+  h1 .line span{transform:none}
+  .hero-eyebrow,.hero-sub,.hero-actions,.hero-meta,.scroll-cue{opacity:1}
+}
+</style>
 </head>
 <body>
-    <header>
-        <h1>Bradley D. Hutchinson - Undergraduate Multidisciplinary Researcher</h1>
-    </header>
-    <main>
-        <section id="about">
-            <h2>About Me</h2>
-            <div class="about-content">
-                <img src="IMG_2526.jpg" alt="Bradley D. Hutchinson" width="200">
-                <div class="about-text">
-                    <p>Hello! My name is Bradley Hutchinson, and I am a third-year undergraduate pursuing three B.S's in Astronomy/Astrophysics, Mathematics, and Physics at Indiana University. With a strong desire to further our understanding of the universe, I have been involved in research since my first year, being an active contributor in projects involving machine learning, multiband stellar photometry, globular clusters, next-to-leading order corrections on a first ATLAS measurement, and beyond the Standard Model (BSM) searches.</p>
-                    <p>My research in astronomy includes working with Dr. Catherine A. Pilachowski and Dr. Christian I. Johnson on new ways to easier analyze multiband photometry of stars in large-scale surveys using unsupervised machine learning (UML), and studying biases in the determination of relaxation time of globular clusters with Dr. Francisco I. Aros. In addition, I am an undergraduate researcher under the supervision of Dr. Sabine Lammers within the ATLAS Experiment at CERN, with my first project being electroweak (EW) corrections on vector boson scattering, and now focusing on a vector-like quarks search, building deep-learning models to distinguish signal from background processes and to reconstruct particle masses from final state observables.</p>
-                </div>
-            </div>
-        </section>
-        <section id="cv">
-            <h2>My CV</h2>
-            <iframe src="BDH_CV.pdf" width="100%" height="1000px"></iframe>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2024 Bradley D. Hutchinson</p>
-    </footer>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-name" href="#top"><span class="dot"></span>B. D. Hutchinson</a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#education">Education</a>
+      <a href="#research">Research</a>
+      <a href="#honors">Honors</a>
+      <a href="#talks">Talks</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header id="top">
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <div class="wrap hero-content">
+    <p class="hero-eyebrow">Astronomy · Machine Learning · Bloomington → Philadelphia</p>
+    <h1>
+      <span class="line"><span>Bradley D.</span></span>
+      <span class="line"><span>Hutchinson<em>.</em></span></span>
+    </h1>
+    <p class="hero-sub">I teach machines to read the sky <strong>in every color at once</strong> — building wavelength-aware, unsupervised methods for the largest multicolor photometric surveys in astronomy.</p>
+    <div class="hero-actions">
+      <a class="btn btn-solid" href="#research">See my research ↓</a>
+      <a class="btn btn-ghost" href="mailto:bhutchin@upenn.edu">Get in touch</a>
+    </div>
+    <div class="hero-meta">
+      <div><span class="k">Next</span><span class="v">Ph.D. @ Penn, Aug 2026</span></div>
+      <div><span class="k">Fellowship</span><span class="v">DOE CSGF, 2026–2030</span></div>
+      <div><span class="k">Latest</span><span class="v">The Astronomical Journal, 170, 255</span></div>
+    </div>
+  </div>
+  <div class="scroll-cue">Scroll</div>
+</header>
+
+<hr class="spectrum">
+
+<section id="about">
+  <div class="wrap">
+    <div class="band-tag reveal"><span class="swatch" style="background:var(--u)"></span>u-band · 354 nm · About</div>
+    <h2 class="reveal">Astronomer by training,<br><em>machine learner</em> by method.</h2>
+    <div class="about-grid">
+      <div class="reveal">
+        <p>I'm an incoming <strong>Physics &amp; Astronomy Ph.D. student at the University of Pennsylvania</strong> and a <strong>Department of Energy Computational Science Graduate Fellow</strong>. I recently graduated from Indiana University with degrees in Astronomy/Astrophysics, Mathematics, and Physics.</p>
+        <p>My research sits where big survey astronomy meets representation learning. Modern telescopes image billions of objects through many filters — far too many for any human to inspect. I build <strong>wavelength-aware, unsupervised methods</strong> that let the data organize itself, surfacing rare and anomalous objects hiding in plain sight.</p>
+        <p>This summer I'm an <strong>AstroAI Institute intern at the Center for Astrophysics | Harvard &amp; Smithsonian</strong>, before heading to Philadelphia in the fall.</p>
+      </div>
+      <aside class="fact-card reveal">
+        <div class="fact"><span class="k">Now</span><span class="v">AstroAI Intern, CfA Harvard</span></div>
+        <div class="fact"><span class="k">From</span><span class="v">Indiana University, '26</span></div>
+        <div class="fact"><span class="k">Degrees</span><span class="v">B.S. Astronomy/Astrophysics B.S. Mathematics B.A. Physics</span></div>
+        <!-- <div class="fact"><span class="k">Advisor</span><span class="v">Catherine A. Pilachowski</span></div> -->
+        <div class="fact"><span class="k">Languages</span><span class="v">EN · ES</span></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section id="education">
+  <div class="wrap">
+    <div class="band-tag reveal"><span class="swatch" style="background:var(--g)"></span>g-band · 477 nm · Education</div>
+    <h2 class="reveal">Indiana &#8594; Philadelphia</h2>
+    <p class="section-lede reveal">From a full-ride at Indiana to a federally funded doctorate at Penn.</p>
+    <div class="timeline">
+      <div class="t-item reveal">
+        <div class="t-date">Starting Aug. 2026</div>
+        <div class="t-title">University of Pennsylvania</div>
+        <div class="t-sub">Ph.D., Physics &amp; Astronomy — supported by the DOE Computational Science Graduate Fellowship</div>
+      </div>
+      <div class="t-item reveal">
+        <div class="t-date">Summer 2026</div>
+        <div class="t-title">Center for Astrophysics | Harvard &amp; Smithsonian</div>
+        <div class="t-sub">Research Intern — AstroAI Institute</div>
+        <div class="t-detail">
+          <span class="k">Advisors · Mike Smith &amp; Cecilia Garraffo</span>
+          <em>Mechanistic interpretability of the wavelength-aware autoencoder</em>
+        </div>
+      </div>
+      <div class="t-item reveal">
+        <div class="t-date">Aug. 2022 – May 2026</div>
+        <div class="t-title">Indiana University</div>
+        <div class="t-sub">B.S. Astronomy/Astrophysics with Honors · B.S. Mathematics · B.A. Physics<br>Jesse H. &amp; Beulah Chanley Cox Scholar — full ride with a 1,200-hour work-study commitment</div>
+        <div class="t-detail">
+          <span class="k">Honors thesis · advised by Catherine A. Pilachowski</span>
+          <em>A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor Photometric Surveys</em>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <div class="wrap">
+    <div class="band-tag reveal"><span class="swatch" style="background:var(--r)"></span>r-band · 623 nm · Research</div>
+    <h2 class="reveal">Letting surveys <em>sort themselves.</em></h2>
+    <p class="section-lede reveal">First-author work published in The Astronomical Journal and interviewed by the American Astronomical Society.</p>
+
+    <article class="pub-card reveal" id="pubcard">
+      <div class="glow"></div>
+      <div class="pub-main">
+        <div class="pub-kicker">Publication · 2025</div>
+        <h3 class="pub-title">A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</h3>
+        <p class="pub-authors"><strong>Hutchinson, B. D.</strong>, Pilachowski, C. A., &amp; Johnson, C. I.</p>
+        <p class="pub-ref">The Astronomical Journal, 170, 255 · doi:10.3847/1538-3881/adf437</p>
+        <p class="pub-blurb">A compact, gated state autoencoder for multicolor photometry. Learned gates decide, object by object, which passbands carry signal and which are noise, compressing each source into a low-dimensional map where physical structure — and the anomalies that break it — emerge without labels.</p>
+        <a class="pub-link" href="https://doi.org/10.3847/1538-3881/adf437" target="_blank" rel="noopener">Read the paper <span>→</span></a>
+      </div>
+      <div class="pub-viz">
+        <canvas id="gsa" width="300" height="250" aria-label="Animated diagram: five passbands compress through a two-dimensional bottleneck and are reconstructed"></canvas>
+        <p class="cap">5 → 4 → 3 → 2 → 3 → 4 → 5 <span class="cap-hover"><br>hover: gates choose what speaks</span></p>
+      </div>
+    </article>
+
+    <div class="research-strip">
+      <div class="r-chip reveal">
+        <div class="bar" style="background:var(--u)"></div>
+        <h3>Anomaly detection</h3>
+        <p>Finding the rare gems — objects that don't fit any known class — in billion-row photometric catalogs.</p>
+      </div>
+      <div class="r-chip reveal">
+        <div class="bar" style="background:var(--g)"></div>
+        <h3>Gated representation learning</h3>
+        <p>Tiny gated state autoencoders — a few hundred parameters — that reweight each passband per object and compress multiband light into interpretable, low-dimensional embeddings.</p>
+      </div>
+      <a class="r-chip reveal" href="https://www.youtube.com/watch?v=LM9TF7DOo4M" target="_blank" rel="noopener">
+        <div class="bar" style="background:var(--i)"></div>
+        <h3>Interviewed by the AAS</h3>
+        <p>The American Astronomical Society's author interview on the paper and the wavelength-aware approach behind it.</p>
+        <span class="r-chip-link">Watch the interview →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="honors">
+  <div class="wrap">
+    <div class="band-tag reveal"><span class="swatch" style="background:var(--i)"></span>i-band · 763 nm · Honors &amp; Awards</div>
+    <h2 class="reveal">Honors &amp; <em>support.</em></h2>
+    <p class="section-lede reveal">I'm grateful for the mentors, departments, and programs that have backed this work.</p>
+
+    <div class="honor-feature">
+      <div class="honor-big hu reveal">
+        <span class="year">2026 – 2030</span>
+        <h3>DOE Computational Science Graduate Fellowship</h3>
+        <p>U.S. Department of Energy — one of the nation's most competitive fellowships for computational research.</p>
+      </div>
+      <div class="honor-big hg reveal">
+        <span class="year">2025</span>
+        <h3>Distinguished Undergraduate</h3>
+        <p>Universities Space Research Association (USRA).</p>
+      </div>
+    </div>
+
+    <div class="honor-list reveal">
+      <div class="honor-row"><span class="y">2024 · 25 · 26</span><span class="n">Hollis &amp; Grete Johnson Undergraduate Research Prize</span><span class="o">IU Astronomy</span></div>
+      <div class="honor-row"><span class="y">2024</span><span class="n">Hugh Brown Memorial Scholarship</span><span class="o">IU Physics</span></div>
+      <div class="honor-row"><span class="y">2024</span><span class="n">Barry Goldwater Scholar Nominee</span><span class="o">IU College of Arts &amp; Sciences</span></div>
+      <div class="honor-row"><span class="y">2022 – 26</span><span class="n">Cox Scholarship (full ride)</span><span class="o">Cox Scholars Program</span></div>
+      <div class="honor-row"><span class="y">2026</span><span class="n">AstroAI Institute Summer Internship</span><span class="o">CfA | Harvard &amp; Smithsonian</span></div>
+      <div class="honor-row"><span class="y">2025</span><span class="n">Fleischer Summer Research Scholarship</span><span class="o">IU College of Arts &amp; Sciences</span></div>
+      <div class="honor-row"><span class="y">2024</span><span class="n">Alice Palma Summer Undergraduate Research Program</span><span class="o">IU Astronomy</span></div>
+      <div class="honor-row"><span class="y">2023</span><span class="n">US ATLAS Summer Undergraduate Program for Exceptional Researchers</span><span class="o">DOE/CERN</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="talks">
+  <div class="wrap">
+    <div class="band-tag reveal"><span class="swatch" style="background:var(--z)"></span>z-band · 913 nm · Presentations</div>
+    <h2 class="reveal">Sharing the <em>work.</em></h2>
+    <p class="section-lede reveal">Five invited talks and two posters across CERN, STScI, Harvard, and the American Astronomical Society.</p>
+    <div class="talk-grid">
+      <div class="talk reveal">
+        <span class="talk-tag tag-invited">Invited</span>
+        <div class="where"><span class="venue">American Astronomical Society</span><span class="date">Dec 2025</span></div>
+        <p class="title">A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</p>
+        <p class="org">Journal Author Series</p>
+      </div>
+      <div class="talk reveal">
+        <span class="talk-tag tag-invited">Invited</span>
+        <div class="where"><span class="venue">IU Dept. of Astronomy</span><span class="date">Apr 2026</span></div>
+        <p class="title">A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</p>
+        <p class="org">Astronomy Honors Colloquium</p>
+      </div>
+      <div class="talk reveal">
+        <span class="talk-tag tag-invited">Invited</span>
+        <div class="where"><span class="venue">Space Telescope Science Institute</span><span class="date">Sep 2024</span></div>
+        <p class="title">Unsupervised Machine Learning Applied to a Large, Multiband, Photometric Survey</p>
+        <p class="org">DeepHST Meeting</p>
+      </div>
+      <div class="talk reveal">
+        <span class="talk-tag tag-invited">Invited</span>
+        <div class="where"><span class="venue">US ATLAS @ CERN</span><span class="date">Aug 2023</span></div>
+        <p class="title">Electroweak Corrections on the ATLAS Vector Boson Scattering of W⁺W⁻</p>
+        <p class="org">SUPER Symposium</p>
+      </div>
+      <div class="talk reveal">
+        <span class="talk-tag tag-poster">Poster</span>
+        <div class="where"><span class="venue">CfA | Harvard &amp; Smithsonian</span><span class="date">Jul 2025</span></div>
+        <p class="title">A Sequential Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</p>
+        <p class="org">AstroAI Workshop</p>
+      </div>
+      <div class="talk reveal">
+        <span class="talk-tag tag-poster">Poster</span>
+        <div class="where"><span class="venue">IU Dept. of Astronomy</span><span class="date">Jul 2024</span></div>
+        <p class="title">Biases on the Determination of Relaxation Times of Globular Clusters</p>
+        <p class="org">Alice Palma Research Celebration</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="band-tag reveal"><span class="swatch" style="background:linear-gradient(90deg,var(--u),var(--z))"></span>Broadband · Skills</div>
+    <h2 class="reveal">The <em>toolkit.</em></h2>
+    <div class="skill-grid" style="margin-top:36px">
+      <div class="skill-block reveal">
+        <h3><span class="swatch" style="background:var(--u)"></span>Programming</h3>
+        <div class="pills"><span class="pill">Python</span><span class="pill">SQL</span><span class="pill">C/C++</span><span class="pill">LaTeX</span></div>
+      </div>
+      <div class="skill-block reveal">
+        <h3><span class="swatch" style="background:var(--g)"></span>Scientific software</h3>
+        <div class="pills"><span class="pill">TensorFlow / Keras</span><span class="pill">NumPy</span><span class="pill">SciPy</span><span class="pill">pandas</span><span class="pill">scikit-learn</span><span class="pill">ROOT</span></div>
+      </div>
+      <div class="skill-block reveal">
+        <h3><span class="swatch" style="background:var(--r)"></span>Machine learning</h3>
+        <div class="pills"><span class="pill">Anomaly detection</span><span class="pill">Representation learning</span><span class="pill">Imbalanced datasets</span></div>
+      </div>
+      <div class="skill-block reveal">
+        <h3><span class="swatch" style="background:var(--z)"></span>Languages</h3>
+        <div class="pills"><span class="pill">English — native</span><span class="pill">Spanish — professional</span><span class="pill">Japanese — beginner</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <hr class="spectrum">
+  <canvas id="cluster" aria-hidden="true"></canvas>
+  <div class="wrap f-content">
+    <h2 class="reveal">Let's find the <em>rare gems</em> together.</h2>
+    <p class="f-lede reveal">Open to research collaborations, talks, and conversations about ML for survey astronomy.</p>
+    <div class="f-actions reveal">
+      <a class="btn btn-ghost f-btn" href="mailto:bhutchin@upenn.edu">bhutchin@upenn.edu</a>
+      <a class="btn btn-ghost f-btn" href="https://github.com/bradhutc" target="_blank" rel="noopener">github.com/bradhutc</a>
+    </div>
+    <div class="f-links reveal">
+      <span>727 E 3rd St, Bloomington, IN 47405</span>
+      <a href="https://doi.org/10.3847/1538-3881/adf437" target="_blank" rel="noopener">Latest paper ↗</a>
+    </div>
+    <div class="f-bottom">
+      <span>© 2026 Bradley D. Hutchinson</span>
+      <span>Generated with Claude Fable 5 · sections keyed to the ugriz bands, 354–913 nm</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ---------- nav: dark glass over the hero, light glass after ---------- */
+const navEl = document.querySelector('nav');
+const heroEl = document.querySelector('header');
+function navState(){
+  navEl.classList.toggle('over-hero', scrollY < heroEl.offsetHeight - 70);
+}
+navState();
+addEventListener('scroll', navState, {passive:true});
+addEventListener('resize', navState);
+
+/* ---------- scroll reveals ---------- */
+const io = new IntersectionObserver(entries=>{
+  for(const e of entries){
+    if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
+  }
+},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach((el,i)=>{
+  el.style.transitionDelay = (i%4)*60+'ms';
+  io.observe(el);
+});
+
+/* ---------- hero sky: a drifting, wavelength-colored star field ----------
+   Stars are tinted by where they'd sit along the visible spectrum —
+   a light-mode nod to multicolor photometry. */
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const c = document.getElementById('sky');
+  const ctx = c.getContext('2d');
+  let W,H,stars=[],raf;
+
+  // spectrum hues from violet (≈265°) sweeping to red (≈10°)
+  function hueAt(t){ return 265 - t*255; }
+
+  function resize(){
+    const dpr = Math.min(devicePixelRatio||1,2);
+    W = c.clientWidth; H = c.clientHeight;
+    c.width = W*dpr; c.height = H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    seed();
+  }
+
+  function seed(){
+    const n = Math.floor((W*H)/9000);
+    stars = Array.from({length:n},()=>{
+      const t = Math.random();
+      return {
+        x: Math.random()*W,
+        y: Math.random()*H,
+        r: .8 + Math.random()*1.9,
+        hue: hueAt(t),
+        vx: (Math.random()-.5)*.06,
+        vy: (Math.random()-.5)*.045,
+        ph: Math.random()*Math.PI*2,
+        sp: .4 + Math.random()*.9
+      };
+    });
+  }
+
+  function draw(time){
+    ctx.clearRect(0,0,W,H);
+    const t = time*0.001;
+    for(const s of stars){
+      if(!reduce){
+        s.x += s.vx; s.y += s.vy;
+        if(s.x<-4)s.x=W+4; if(s.x>W+4)s.x=-4;
+        if(s.y<-4)s.y=H+4; if(s.y>H+4)s.y=-4;
+      }
+      const tw = reduce ? .65 : .45 + .32*Math.sin(t*s.sp + s.ph);
+      // soft halo
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${s.hue},75%,72%,${tw*.18})`;
+      ctx.arc(s.x,s.y,s.r*3.4,0,7);
+      ctx.fill();
+      // core
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${s.hue},78%,70%,${tw})`;
+      ctx.arc(s.x,s.y,s.r,0,7);
+      ctx.fill();
+    }
+    if(!reduce) raf = requestAnimationFrame(draw);
+  }
+
+  resize();
+  addEventListener('resize',()=>{cancelAnimationFrame(raf);resize();raf=requestAnimationFrame(draw)});
+  raf = requestAnimationFrame(draw);
+})();
+
+/* ---------- the model, live: 5 → 4 → 3 → 2 → 3 → 4 → 5 ----------
+   Pulses flow through the gated state autoencoder. On hover (or tap),
+   the input gates engage: each passband dims or brightens at its own
+   rate — the model deciding which bands carry signal. Dashed arcs show
+   encoder (h, c) states seeding their mirrored decoder layers. */
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cv = document.getElementById('gsa');
+  const card = document.getElementById('pubcard');
+  if(!cv || !card) return;
+  const ctx = cv.getContext('2d');
+
+  const LAYERS = [5,4,3,2,3,4,5];
+  const BANDS  = ['#7B5BD6','#2E9E78','#E08A3C','#D8554A','#9A4B6E']; // u g r i z
+  const INNER  = '#9BA0B0';
+  const BOTTLE = '#1C2030';
+  let W=300, H=250, nodes=[], raf=null, running=false;
+  let gAmt=0, hovering=false;
+  const gw = [1.6, 2.6, 1.2, 3.2, 2.0];      // per-band gate frequencies
+  const gp = [0, 2.1, 4.0, 1.2, 3.3];        // phases
+
+  // state-coupling arcs: enc L1 -> dec L2, enc L2 -> dec L1 (reversed mirror)
+  const ARCS = [
+    {a:1, b:5, col:'123,91,214', lift:46},   // purple, outer
+    {a:2, b:4, col:'46,158,120', lift:25}    // green, inner
+  ];
+
+  function build(){
+    const dpr = Math.min(devicePixelRatio||1,2);
+    W = cv.clientWidth || 300; H = W * (250/300);
+    cv.width = W*dpr; cv.height = H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const padX = 30, spacing = Math.min(34, (H-76)/4);
+    nodes = LAYERS.map((n,L)=>{
+      const x = padX + L*(W-2*padX)/(LAYERS.length-1);
+      return Array.from({length:n},(_,j)=>({
+        x, y: H/2 + 14 + (j-(n-1)/2)*spacing
+      }));
+    });
+  }
+
+  const T = 3.4;                 // seconds per wave
+  const SD = 0.135;              // stage duration (fraction of cycle)
+  const easeIO = x => x<.5 ? 2*x*x : 1-Math.pow(-2*x+2,2)/2;
+
+  function gate(i,t){
+    const osc = 0.06 + 0.94*(0.5 + 0.5*Math.sin(t*gw[i] + gp[i]));
+    return 1 + (osc-1)*gAmt;     // 1 when idle, oscillating when gating
+  }
+
+  function nodeStyle(L,j){
+    if(L===0||L===6) return {color:BANDS[j], r: Math.min(W,H)*0.020+2.6};
+    if(L===3)        return {color:BOTTLE,  r: Math.min(W,H)*0.018+2.6};
+    return {color:INNER, r: Math.min(W,H)*0.013+2.2};
+  }
+
+  function qpoint(p0,c,p1,q){
+    const u = 1-q;
+    return {
+      x: u*u*p0.x + 2*u*q*c.x + q*q*p1.x,
+      y: u*u*p0.y + 2*u*q*c.y + q*q*p1.y
+    };
+  }
+
+  function draw(now){
+    const t = now/1000;
+    gAmt += ((hovering?1:0) - gAmt)*0.12;     // ease gates in/out
+    const tw = (t % T)/T;
+    ctx.clearRect(0,0,W,H);
+
+    // --- edges (faint scaffold) ---
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(28,32,48,0.06)';
+    for(let L=0; L<6; L++){
+      for(const a of nodes[L]) for(const b of nodes[L+1]){
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      }
+    }
+
+    // --- state-coupling arcs over the bottleneck ---
+    for(const arc of ARCS){
+      const p0 = {x:nodes[arc.a][0].x, y:nodes[arc.a][0].y - 11};
+      const p1 = {x:nodes[arc.b][0].x, y:nodes[arc.b][0].y - 11};
+      const c  = {x:(p0.x+p1.x)/2, y:Math.min(p0.y,p1.y) - arc.lift};
+      // dashed arc with slow marching dashes
+      ctx.strokeStyle = `rgba(${arc.col},0.5)`;
+      ctx.lineWidth = 1.3;
+      ctx.setLineDash([4,5]);
+      ctx.lineDashOffset = reduce ? 0 : -t*14;
+      ctx.beginPath(); ctx.moveTo(p0.x,p0.y);
+      ctx.quadraticCurveTo(c.x,c.y,p1.x,p1.y); ctx.stroke();
+      ctx.setLineDash([]);
+      // label at apex
+      const apex = qpoint(p0,c,p1,0.5);
+      ctx.font = '9px "Spline Sans Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = `rgba(${arc.col},0.85)`;
+      ctx.fillText('h, c', apex.x, apex.y - 5);
+      // state pulse: departs as the wave passes its encoder layer and
+      // lands exactly when the wave reaches the mirror decoder layer —
+      // so the outer arc (enc L1 → dec L2) travels longer than the inner
+      if(!reduce){
+        const dep = arc.a*SD, arr = arc.b*SD;
+        if(tw > dep && tw < arr){
+          const q = easeIO((tw-dep)/(arr-dep));
+          const pt = qpoint(p0,c,p1,q);
+          ctx.fillStyle = `rgba(${arc.col},0.95)`;
+          ctx.beginPath(); ctx.arc(pt.x,pt.y,2.2,0,7); ctx.fill();
+        }
+      }
+    }
+
+    // --- traveling pulses ---
+    if(!reduce){
+      for(let s=0; s<6; s++){
+        const st0 = s*SD;
+        if(tw < st0 || tw > st0+SD) continue;
+        const p = easeIO((tw-st0)/SD);
+        for(let ai=0; ai<nodes[s].length; ai++){
+          const a = nodes[s][ai];
+          for(let bi=0; bi<nodes[s+1].length; bi++){
+            const b = nodes[s+1][bi];
+            const x = a.x + (b.x-a.x)*p, y = a.y + (b.y-a.y)*p;
+            let col, alpha = .55*Math.sin(p*Math.PI);
+            if(s===0){ col = BANDS[ai]; alpha *= gate(ai,t); }
+            else if(s===5){ col = BANDS[bi]; alpha *= gate(bi,t); }
+            else { col = '#5A6072'; alpha *= .7; }
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = col;
+            ctx.beginPath(); ctx.arc(x,y,1.7,0,7); ctx.fill();
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // --- layer activation glow (wave arriving) ---
+    function act(L){
+      if(reduce) return 0;
+      const arrive = L*SD;
+      let d = tw - arrive; if(d<0) d += 1;
+      return Math.max(0, 1 - d/0.14);
+    }
+
+    // --- nodes ---
+    for(let L=0; L<7; L++){
+      const aL = act(L);
+      for(let j=0; j<nodes[L].length; j++){
+        const n = nodes[L][j], st = nodeStyle(L,j);
+        let g = 1, baseA = (L===0||L===6) ? .95 : (L===3 ? .95 : .55);
+        if(L===0) g = gate(j,t);
+        if(L===6) g = 0.3 + 0.7*gate(j,t);  // reconstruction echoes the gates
+        const r = st.r * (0.7 + 0.3*g) * (1 + aL*0.22);
+        const alpha = baseA * (0.15 + 0.85*g);
+        // halo
+        ctx.globalAlpha = alpha * (0.14 + aL*0.3);
+        ctx.fillStyle = st.color;
+        ctx.beginPath(); ctx.arc(n.x,n.y,r*2.6,0,7); ctx.fill();
+        // core
+        ctx.globalAlpha = alpha;
+        ctx.beginPath(); ctx.arc(n.x,n.y,r,0,7); ctx.fill();
+        // bottleneck ring
+        if(L===3){
+          ctx.globalAlpha = .5 + aL*.5;
+          ctx.strokeStyle = BOTTLE; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(n.x,n.y,r+3.4,0,7); ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    if(running && !reduce) raf = requestAnimationFrame(draw);
+  }
+
+  function startStop(on){
+    if(on && !running){ running = true; raf = requestAnimationFrame(draw); }
+    else if(!on && running){ running = false; cancelAnimationFrame(raf); }
+  }
+
+  build();
+  if(reduce){ draw(0); }                       // static diagram
+  else{
+    new IntersectionObserver(es=>startStop(es[0].isIntersecting),{threshold:.15}).observe(cv);
+  }
+
+  // hover / focus / touch all engage the gates
+  card.addEventListener('pointerenter', e=>{ if(e.pointerType!=='touch') hovering=true; });
+  card.addEventListener('pointerleave', ()=>hovering=false);
+  card.addEventListener('mouseenter', ()=>hovering=true);
+  card.addEventListener('mouseleave', ()=>hovering=false);
+  card.addEventListener('focusin',  ()=>hovering=true);
+  card.addEventListener('focusout', ()=>hovering=false);
+  cv.addEventListener('pointerdown', e=>{ if(e.pointerType==='touch') hovering=!hovering; });
+
+  addEventListener('resize', ()=>{ build(); if(reduce) draw(0); });
+})();
+
+
+/* ---------- footer: scattered colors assemble into a globular cluster ----------
+   Spectrum-colored points begin dispersed across the footer, then fall
+   together into a dense-cored cluster — many passbands, one object. */
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const c = document.getElementById('cluster');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const footer = c.closest('footer');
+  let W,H,pts=[],raf,t0=null,started=false,assembled=false;
+
+  const ease = x => 1 - Math.pow(1-x, 3); // ease-out cubic
+
+  function build(){
+    const dpr = Math.min(devicePixelRatio||1,2);
+    W = footer.clientWidth; H = footer.clientHeight;
+    c.width = W*dpr; c.height = H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+
+    // cluster center: right of content on wide screens, upper-center on narrow
+    const cx = W > 900 ? W*0.78 : W*0.5;
+    const cy = W > 900 ? H*0.42 : H*0.30;
+    const R  = Math.min(W,H) * (W > 900 ? 0.30 : 0.26);
+
+    const n = 520;
+    pts = Array.from({length:n},()=>{
+      // King-ish radial profile: dense core, sparse halo
+      const r  = R * Math.pow(Math.random(), 2.3);
+      const a  = Math.random()*Math.PI*2;
+      const tx = cx + Math.cos(a)*r;
+      const ty = cy + Math.sin(a)*r*0.92;       // slight flattening
+      return {
+        sx: Math.random()*W, sy: Math.random()*H, // scattered start
+        tx, ty, r, a,
+        cx, cy,
+        size: .7 + Math.random()*1.5 + (1 - r/R)*0.9, // brighter toward core
+        hue: 265 - Math.random()*255,             // full visible spectrum
+        delay: Math.random()*0.9,                 // staggered departure
+        ph: Math.random()*Math.PI*2,
+        om: (0.02 + Math.random()*0.05) * (Math.random()<.5?-1:1) // slow orbit
+      };
+    });
+  }
+
+  function draw(now){
+    if(t0===null) t0 = now;
+    const elapsed = (now - t0)/1000;
+    ctx.clearRect(0,0,W,H);
+
+    for(const p of pts){
+      let x,y;
+      const k = Math.min(Math.max((elapsed - p.delay)/2.4, 0), 1); // 2.4s flight
+      if(k < 1 && !reduce){
+        const e = ease(k);
+        // gentle arc on the way in
+        const bend = Math.sin(e*Math.PI) * 26 * Math.sin(p.ph);
+        x = p.sx + (p.tx-p.sx)*e + bend*0.4;
+        y = p.sy + (p.ty-p.sy)*e + bend;
+      } else {
+        assembled = true;
+        // settled: slow orbital drift + twinkle
+        const a = p.a + (reduce ? 0 : elapsed*p.om);
+        x = p.cx + Math.cos(a)*p.r;
+        y = p.cy + Math.sin(a)*p.r*0.92;
+      }
+      const tw = reduce ? .8 : .55 + .35*Math.sin(elapsed*1.4 + p.ph);
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${p.hue},75%,72%,${tw*.18})`;
+      ctx.arc(x,y,p.size*3.2,0,7);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${p.hue},78%,${62 + (1-p.r/(Math.min(W,H)*0.30))*14}%,${tw})`;
+      ctx.arc(x,y,p.size,0,7);
+      ctx.fill();
+    }
+    raf = requestAnimationFrame(draw);
+  }
+
+  function start(){
+    if(started) return;
+    started = true;
+    build();
+    if(reduce){
+      // skip the flight: render the settled cluster once
+      t0 = -1e6; draw(0); cancelAnimationFrame(raf);
+      return;
+    }
+    raf = requestAnimationFrame(draw);
+  }
+
+  new IntersectionObserver((entries,obs)=>{
+    if(entries[0].isIntersecting){ start(); obs.disconnect(); }
+  },{threshold:.25}).observe(footer);
+
+  addEventListener('resize',()=>{
+    if(!started) return;
+    cancelAnimationFrame(raf);
+    const wasAssembled = assembled;
+    build();
+    if(wasAssembled) t0 = -1e6;   // don't replay the flight on resize
+    else t0 = null;
+    if(reduce){ draw(0); cancelAnimationFrame(raf); }
+    else raf = requestAnimationFrame(draw);
+  });
+})();</script>
 </body>
 </html>
