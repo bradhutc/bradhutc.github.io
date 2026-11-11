@@ -7,475 +7,427 @@
 <meta name="description" content="Bradley D. Hutchinson — Ph.D. student in Applied Mathematics & Computational Science at the University of Pennsylvania, DOE Computational Science Graduate Fellow, and astronomer.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Karla:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   TOKENS — "Deep Field Survey"
-   A dark-mode site for a wavelength-aware computational scientist.
-   Structure is keyed to the SDSS ugriz photometric bands:
-   each section carries its own filter and its own luminous hue.
+   ONE LIVING FIGURE
+   The page is laid out like a journal plate. Text runs down the
+   left; on the right, a single field of stars stays in view and
+   rearranges itself as you read: a cluster on the sky, the same
+   stars in two coordinates, a color-magnitude diagram, a spiral
+   galaxy, a polar map of the sky.
+   Every star keeps one color throughout, drawn from a single
+   ramp: blue for hot light, cream, then copper for cool light.
    ============================================================ */
 :root{
-  --paper:#04050A;
-  --paper-raised:#0B0E17;
-  --paper-glass:rgba(14, 18, 30, 0.72);
-  --ink:#F2F4FA;
-  --ink-soft:#A6B0C9;
-  --ink-faint:#65708B;
-  --line:#1A2033;
-  --line-bright:#2A334D;
+  --bg:#030304;
+  --ink:#F4EFE4;
+  --soft:#ABA79D;
+  --faint:#6F6C65;
+  --line:#25241F;
+  --line-2:#3A3832;
 
-  /* ugriz band hues — luminous emission palette */
-  --u:#9D7BFF;  /* 354 nm */
-  --g:#36D69E;  /* 477 nm */
-  --r:#FF9E44;  /* 623 nm */
-  --i:#FF6257;  /* 763 nm */
-  --z:#D4629A;  /* 913 nm */
+  --blue-deep:#6686CC;
+  --blue:#7C9EE2;
+  --blue-pale:#A1BEEE;
+  --cream:#FDF8E9;
+  --sand:#F7DFB2;
+  --copper:#E7B387;
+  --copper-deep:#C38A6B;
+  --ramp:linear-gradient(90deg,#6686CC 0%,#7C9EE2 16%,#A1BEEE 32%,#FDF8E9 50%,#F7DFB2 66%,#E7B387 82%,#C38A6B 100%);
 
-  --display:'Spectral', Georgia, serif;
-  --body:'Karla', system-ui, sans-serif;
-  --mono:'Spline Sans Mono', ui-monospace, monospace;
+  --display:'Instrument Serif','Iowan Old Style',Georgia,serif;
+  --body:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
 
-  --max:1060px;
-  --pad:clamp(20px,5vw,56px);
+  --rail:clamp(150px,11.5vw,190px);
+  --colw:min(660px,calc(56vw - var(--rail)));
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;color-scheme:dark}
 body{
-  background:var(--paper);
-  color:var(--ink);
-  font-family:var(--body);
-  font-size:17px;
-  line-height:1.65;
-  -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
+  background:var(--bg);color:var(--ink);
+  font-family:var(--body);font-size:17px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
-::selection{background:rgba(157,123,255,.3);color:#fff}
-
+::selection{background:rgba(124,158,226,.35);color:#fff}
 a{color:inherit;text-decoration:none}
-a:focus-visible,button:focus-visible{outline:2px solid var(--u);outline-offset:3px;border-radius:2px}
+a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 
-.wrap{max-width:var(--max);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
+/* ---------- the figure (fixed, behind everything) ---------- */
+#plate{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none}
+.plate-cap{
+  position:fixed;z-index:1;bottom:30px;text-align:center;pointer-events:none;
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--faint);
+  transition:opacity .4s ease;
+}
+.plate-cap b{display:block;font-weight:500;color:var(--soft);letter-spacing:.2em;text-transform:uppercase;margin-bottom:5px}
+.plate-cap i{font-family:var(--display);font-style:italic;font-size:16.5px;letter-spacing:0;color:var(--ink);display:block}
+.plate-cap .bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:13px;text-transform:uppercase;font-size:10px;letter-spacing:.16em}
+.plate-cap .bar span.r{width:150px;height:3px;background:var(--ramp);border-radius:2px}
 
-/* ---------- spectrum rule: the recurring signature ---------- */
-.spectrum{
-  height:2px;border:0;
-  background:linear-gradient(90deg,var(--u),#4C8DFF,var(--g),#E2DC4B,var(--r),var(--i),var(--z));
-  opacity:.9;
-  box-shadow:0 0 18px rgba(157,123,255,.45);
-}
+/* ---------- hero instrument: filters, three stars, their light ---------- */
+.scope{width:100%;max-width:580px;padding:22px 24px 18px;background:rgba(3,3,4,.82);border:1px solid var(--line-2);position:relative}
+.scope::before,.scope::after{content:"";position:absolute;width:11px;height:11px;border:1px solid var(--soft)}
+.scope::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.scope::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.sc-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.sc-k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);width:46px;flex:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--soft);background:none;
+  border:1px solid var(--line-2);border-radius:999px;padding:5px 11px;min-width:34px;cursor:pointer;
+  transition:color .2s,background .2s,border-color .2s}
+#filters button:not(:first-child):not(:last-child){font-family:var(--display);font-style:italic;font-size:15px;padding:2px 11px 4px}
+.chips button:hover{color:var(--ink);border-color:var(--soft)}
+.chips button.on{color:#030304;background:var(--c,var(--cream));border-color:transparent}
+.chips button:focus-visible,.spec:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+#sed{width:100%;height:auto;display:block;margin-top:14px}
+.sc-cap{font-family:var(--mono);font-size:10.5px;line-height:1.6;letter-spacing:.04em;color:var(--faint);margin-top:2px}
+.sc-cap span{color:var(--ink)}
+.sc-cap i{font-style:normal}
+.spec{position:fixed;z-index:4;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:none;border:0;
+  cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s}
+.spec.live{opacity:1;pointer-events:auto}
+.spec span{position:absolute;left:56px;top:50%;transform:translateY(-50%);white-space:nowrap;
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);transition:color .2s}
+.spec:hover span,.spec.on span{color:var(--ink)}
 
-/* ---------- nav ---------- */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:50;
-  background:rgba(4,5,10,.78);
-  backdrop-filter:blur(16px);
-  border-bottom:1px solid var(--line);
-  transition:background .35s ease,border-color .35s ease;
+/* ---------- left axis: the navigation is a ruler ---------- */
+.axis{position:fixed;z-index:5;left:0;top:0;bottom:0;width:var(--rail);pointer-events:none}
+.axis .spine{position:absolute;left:38px;top:13vh;bottom:13vh;width:1px;background:var(--line-2)}
+.axis .spine::before,.axis .spine::after{content:"";position:absolute;left:-4px;width:9px;height:1px;background:var(--line-2)}
+.axis .spine::before{top:0}.axis .spine::after{bottom:0}
+.axis .minor{position:absolute;left:38px;top:13vh;bottom:13vh;width:5px;
+  background:repeating-linear-gradient(180deg,var(--line-2) 0 1px,transparent 1px 14px)}
+.axis a{
+  position:absolute;left:38px;transform:translateY(-50%);pointer-events:auto;
+  display:flex;align-items:center;gap:9px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  transition:color .25s;
 }
-nav.over-hero{background:rgba(4,5,10,.28);border-bottom-color:rgba(255,255,255,.06)}
-nav.over-hero .nav-name{color:#fff}
-nav.over-hero .nav-links a{color:#B9C2D9}
-nav.over-hero .nav-links a:hover{color:#fff}
-.nav-inner{
-  max-width:var(--max);margin:0 auto;
-  padding:14px var(--pad);
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-}
-.nav-name{font-family:var(--display);font-weight:500;font-size:18px;letter-spacing:.01em;color:var(--ink)}
-.nav-name .dot{display:inline-block;width:9px;height:9px;border-radius:50%;
-  background:conic-gradient(var(--u),var(--g),var(--r),var(--i),var(--z),var(--u));
-  box-shadow:0 0 10px var(--u);
-  margin-right:10px;transform:translateY(-1px)}
-.nav-links{display:flex;gap:26px;font-size:13.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-.nav-links a{color:var(--ink-soft);position:relative;padding:4px 0;transition:color .2s}
-.nav-links a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:2px;
-  background:currentColor;transition:right .25s ease}
-.nav-links a:hover{color:var(--ink)}
-.nav-links a:hover::after{right:0}
-@media(max-width:720px){.nav-links{display:none}}
+.axis a::before{content:"";width:11px;height:1px;background:currentColor;transition:width .25s}
+.axis a:hover,.axis a.on{color:var(--ink)}
+.axis a.on::before{width:18px}
+.axis .mark{position:absolute;left:33px;width:11px;height:11px;border-radius:50%;margin-top:-5px;
+  background:var(--cream);box-shadow:0 0 0 3px var(--bg),0 0 14px 2px rgba(253,248,233,.55)}
+.axis a.name{position:absolute;left:30px;top:26px;transform:none;pointer-events:auto;display:block;
+  font-family:var(--display);font-size:19px;letter-spacing:0;text-transform:none;color:var(--ink);white-space:nowrap;
+  transition:opacity .4s ease}
+.axis a.name::before{display:none}
+.axis.scrolled a.name{opacity:0;pointer-events:none}
+.axis .name em{font-style:italic;background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.topbar{display:none}
+
+/* ---------- column ---------- */
+main,header,footer{position:relative;z-index:2}
+.col{margin-left:var(--rail);width:var(--colw)}
 
 /* ---------- hero ---------- */
-header{
-  position:relative;
-  min-height:95vh;
-  display:flex;align-items:center;
-  overflow:hidden;
-  background:#020306;
-}
-#sky{position:absolute;inset:0;width:100%;height:100%;display:block}
-.hero-vignette{
-  position:absolute;inset:0;pointer-events:none;z-index:1;
-  background:
-    radial-gradient(circle at 24% 52%, rgba(2,3,6,0.58) 0%, rgba(2,3,6,0.22) 48%, transparent 75%),
-    linear-gradient(180deg, rgba(2,3,6,0.3) 0%, transparent 25%, transparent 80%, var(--paper) 100%);
-}
-.hero-content{position:relative;z-index:2;padding-top:96px;padding-bottom:64px}
-
-.hero-eyebrow{
-  font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;
-  color:#B4BEE0;text-transform:uppercase;
-  display:flex;align-items:center;gap:12px;margin-bottom:26px;
-  opacity:0;animation:rise .8s ease .15s forwards;
-}
-.hero-eyebrow::before{content:"";width:34px;height:2px;
-  background:linear-gradient(90deg,var(--u),var(--g),var(--r))}
-
-h1{
-  font-family:var(--display);font-weight:300;
-  font-size:clamp(44px,8.2vw,92px);
-  line-height:1.02;letter-spacing:-.015em;
-  margin-bottom:8px;
-  color:#FFFFFF;
-  text-shadow:0 8px 36px rgba(0,0,0,.75);
-}
-h1 .line{display:block;overflow:hidden}
-h1 .line span{display:inline-block;transform:translateY(110%);
-  animation:lift 1s cubic-bezier(.2,.7,.2,1) forwards}
-h1 .line:nth-child(2) span{animation-delay:.12s}
-h1 em{font-style:italic;font-weight:300;
-  background:linear-gradient(100deg,#B79BFF 0%,#6FA8F5 35%,#4CE8B0 65%,#FFB45C 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-
-.hero-sub{
-  max-width:590px;font-size:clamp(17px,2.1vw,20px);color:#C3CCE4;
-  margin-top:22px;
-  text-shadow:0 2px 16px rgba(0,0,0,.85);
-  opacity:0;animation:rise .9s ease .45s forwards;
-}
-.hero-sub strong{color:#fff;font-weight:600}
-
-.hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px;
-  opacity:0;animation:rise .9s ease .6s forwards}
-.btn{
-  font-family:var(--body);font-weight:600;font-size:15px;
-  padding:13px 26px;border-radius:999px;border:1px solid var(--line-bright);
-  transition:transform .2s ease,box-shadow .2s ease,background .2s,color .2s,border-color .2s;
-  display:inline-flex;align-items:center;gap:9px;cursor:pointer;
-}
-.btn-solid{background:#fff;color:#05070E;border-color:#fff}
-.btn-solid:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(157,123,255,.35)}
-.btn-ghost{background:rgba(11,14,23,.55);color:#fff;border-color:rgba(255,255,255,.32);backdrop-filter:blur(8px)}
-.btn-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.12);border-color:#fff;box-shadow:0 10px 28px rgba(0,0,0,.45)}
-
-.hero-meta{
-  margin-top:54px;display:flex;flex-wrap:wrap;gap:34px;
-  opacity:0;animation:rise 1s ease .75s forwards;
-}
-.hero-meta div{font-size:13.5px}
-.hero-meta .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;
-  text-transform:uppercase;color:#8490B0;display:block;margin-bottom:3px}
-.hero-meta .v{font-weight:600;color:#fff}
-
-.scroll-cue{
-  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;
-  font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:#8B95B2;
-  text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px;
-  opacity:0;animation:rise 1s ease 1.1s forwards;
-}
-.scroll-cue::after{content:"";width:1px;height:34px;
-  background:linear-gradient(var(--u),transparent);
-  animation:drip 2.2s ease-in-out infinite}
-
-@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+header{height:auto}
+.pin{position:relative;min-height:100vh;display:flex;align-items:center}
+.scope-wrap{padding:44px 0 0}
+.spectrum{padding-top:56px}
+.spectrum svg{display:block;overflow:visible}
+.spectrum .hit{cursor:pointer}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);
+  display:flex;align-items:center;gap:12px;margin-bottom:26px;opacity:0;animation:rise .8s ease .15s forwards}
+.eyebrow::before{content:"";width:40px;height:2px;background:var(--ramp)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(52px,7.6vw,112px);line-height:.96;letter-spacing:-.015em;color:var(--cream)}
+h1 .line{display:block;overflow:hidden;padding-bottom:.08em}
+h1 .line span{display:inline-block;transform:translateY(110%);animation:lift 1.1s cubic-bezier(.2,.7,.2,1) forwards}
+h1 .line:nth-child(2) span{animation-delay:.12s;font-style:italic}
+h1 em{font-style:italic;background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{max-width:560px;font-size:clamp(17px,1.5vw,19.5px);color:var(--soft);margin-top:26px;opacity:0;animation:rise .9s ease .45s forwards}
+.hero-sub strong{color:var(--cream);font-weight:500;font-family:var(--display);font-style:italic;font-size:1.16em}
+.actions{display:flex;flex-wrap:wrap;gap:28px;margin-top:36px;opacity:0;animation:rise .9s ease .6s forwards}
+.lnk{font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);
+  padding-bottom:7px;position:relative;display:inline-flex;gap:10px;align-items:center}
+.lnk::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--ramp);
+  transform-origin:left;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.lnk.q::after{background:var(--line-2)}
+.lnk:hover::after{transform:scaleX(1.06)}
+.lnk.q:hover::after{background:var(--ramp)}
+.readout{margin-top:60px;display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:0;
+  border-top:1px solid var(--line-2);opacity:0;animation:rise 1s ease .75s forwards}
+.readout div{padding:14px 28px 0 0;margin-right:28px;position:relative;font-size:14px}
+.readout div::before{content:"";position:absolute;top:-1px;left:0;width:1px;height:7px;background:var(--soft)}
+.readout .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:2px}
+.readout .v{font-weight:600;color:var(--ink)}
+@media(min-width:641px){.readout div:not(:last-child) .v{white-space:nowrap}}
+.cue{position:absolute;left:var(--rail);bottom:28px;font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);
+  display:flex;align-items:center;gap:12px;opacity:0;animation:rise 1s ease 1.1s forwards}
+.cue::before{content:"";width:1px;height:30px;background:linear-gradient(var(--cream),transparent);animation:drip 2.2s ease-in-out infinite}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes lift{to{transform:none}}
-@keyframes drip{0%,100%{transform:scaleY(.4);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}}
+@keyframes drip{0%,100%{transform:scaleY(.35);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}}
 
-/* ---------- sections ---------- */
-section{
-  padding:clamp(70px,10vw,120px) 0;
-  position:relative;
-  background:radial-gradient(circle at 85% 15%, rgba(157,123,255,0.035), transparent 55%);
-}
-section + section{border-top:1px solid var(--line)}
+/* ---------- sections: figure panels ---------- */
+section{padding:clamp(80px,13vh,150px) 0}
+.panel{display:flex;align-items:baseline;gap:16px;margin-bottom:26px;
+  border-top:1px solid var(--line-2);padding-top:14px;position:relative}
+.panel::before{content:"";position:absolute;top:-1px;left:0;width:64px;height:2px;background:var(--ramp)}
+.panel::after{content:"";position:absolute;top:0;left:0;right:0;height:6px;
+  background:repeating-linear-gradient(90deg,var(--line-2) 0 1px,transparent 1px 33px)}
+.panel b{font-family:var(--body);font-weight:700;font-size:21px;color:var(--cream)}
+.panel span{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(34px,4.1vw,56px);line-height:1.04;letter-spacing:-.01em;color:var(--cream);margin-bottom:18px}
+h2 em{font-style:italic;color:var(--copper)}
+section:nth-of-type(odd) h2 em{color:var(--blue-pale)}
+.lede{color:var(--soft);max-width:560px;margin-bottom:40px;font-size:17.5px}
 
-.band-tag{
-  display:inline-flex;align-items:center;gap:10px;
-  font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--ink-soft);
-  border:1px solid var(--line-bright);border-radius:999px;
-  padding:7px 16px;margin-bottom:22px;background:var(--paper-raised);
-  box-shadow:0 4px 20px rgba(0,0,0,.35);
-}
-.band-tag .swatch{width:10px;height:10px;border-radius:50%;box-shadow:0 0 10px currentColor}
-
-h2{
-  font-family:var(--display);font-weight:400;
-  font-size:clamp(30px,4.6vw,46px);line-height:1.12;letter-spacing:-.01em;
-  margin-bottom:14px;max-width:660px;color:var(--ink);
-}
-h2 em{font-style:italic;color:#fff}
-.section-lede{color:var(--ink-soft);max-width:600px;margin-bottom:48px;font-size:17.5px}
-
-/* reveal on scroll */
-.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
 .reveal.in{opacity:1;transform:none}
 
-/* ---------- about ---------- */
-.about-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:clamp(36px,6vw,80px);align-items:start}
-.about-grid p + p{margin-top:18px}
-.about-grid p{color:var(--ink-soft)}
-.about-grid p strong{color:var(--ink);font-weight:600}
-.fact-card{
-  background:var(--paper-raised);border:1px solid var(--line-bright);border-radius:18px;
-  padding:28px;position:relative;overflow:hidden;
-  box-shadow:0 18px 44px rgba(0,0,0,.45);
+/* about */
+.prose p{color:var(--soft)}
+.prose p+p{margin-top:18px}
+.prose strong{color:var(--ink);font-weight:600}
+.prose p:first-child::first-letter{font-family:var(--display);font-size:3.3em;line-height:.82;float:left;padding:6px 10px 0 0;color:var(--cream)}
+.table{margin-top:44px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+.table caption,.tcap{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:44px 0 10px}
+.tcap+.table{margin-top:0}
+.row{display:grid;grid-template-columns:130px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.row:last-child{border-bottom:0}
+.row .k{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding-top:3px}
+.row .v{font-weight:600;color:var(--ink)}
+
+/* education: a track of points, blue to copper */
+.track{position:relative}
+.track::before{content:"";position:absolute;left:5px;top:10px;bottom:10px;width:1px;background:linear-gradient(var(--blue),var(--cream),var(--copper-deep))}
+.stop{position:relative;padding:0 0 46px 40px}
+.stop:last-child{padding-bottom:0}
+.stop::before{content:"";position:absolute;left:0;top:8px;width:11px;height:11px;border-radius:50%;
+  background:var(--c);box-shadow:0 0 0 4px var(--bg),0 0 16px 1px var(--c);transition:transform .3s}
+.stop:hover::before{transform:scale(1.35)}
+.stop .d{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.stop .t{font-family:var(--display);font-size:29px;line-height:1.15;margin:5px 0 6px;color:var(--cream)}
+.stop .s{color:var(--soft);font-size:15.5px}
+.note{margin-top:14px;padding-left:16px;border-left:1px solid var(--line-2);font-size:14px;color:var(--soft)}
+.note .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:3px}
+.note em{font-family:var(--display);font-style:italic;font-size:18px;color:var(--ink);line-height:1.3;display:block}
+
+/* research */
+.pub{border:1px solid var(--line-2);position:relative;transition:border-color .4s}
+.pub:hover{border-color:#5a564c}
+.pub::before,.pub::after{content:"";position:absolute;width:11px;height:11px;border:1px solid var(--soft)}
+.pub::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.pub::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.pub-viz{border-bottom:1px solid var(--line);padding:12px 12px 8px;position:relative}
+#gsa{width:100%;height:auto;display:block}
+.pub-viz .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;text-align:center;padding:2px 0 6px}
+.cap-hover{opacity:.6;transition:opacity .3s,color .3s}
+.pub:hover .cap-hover{opacity:1;color:var(--copper)}
+.pub-main{padding:clamp(22px,3vw,34px)}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue-pale);margin-bottom:12px}
+.pub-title{font-family:var(--display);font-weight:400;font-size:clamp(25px,2.6vw,33px);line-height:1.14;color:var(--cream)}
+.pub-authors{margin-top:14px;color:var(--soft);font-size:15px}
+.pub-authors strong{color:var(--ink)}
+.pub-ref{margin-top:4px;font-family:var(--mono);font-size:12px;color:var(--faint)}
+.pub-blurb{margin-top:18px;color:var(--soft);font-size:15.5px}
+.pub-main .lnk{margin-top:24px}
+.themes{margin-top:34px;border-top:1px solid var(--line-2)}
+.theme{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:20px 0;border-bottom:1px solid var(--line);position:relative;transition:padding .3s}
+.theme::before{content:"";position:absolute;left:0;top:-1px;height:1px;width:0;background:var(--c);transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.theme:hover::before{width:100%}
+.theme h3{font-family:var(--display);font-weight:400;font-size:22px;line-height:1.2;color:var(--cream)}
+.theme h3::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c);margin-right:11px;transform:translateY(-3px)}
+.theme p{font-size:14.5px;color:var(--soft);line-height:1.55}
+.theme .go{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--copper)}
+
+/* honors */
+.feature{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:8px}
+.big{padding-top:16px;border-top:2px solid var(--c)}
+.big .y{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--faint)}
+.big h3{font-family:var(--display);font-weight:400;font-size:27px;line-height:1.12;margin:8px 0 8px;color:var(--cream)}
+.big p{font-size:14px;color:var(--soft);line-height:1.55}
+.hrow{display:grid;grid-template-columns:104px 1fr auto;gap:14px;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--line);transition:background .2s,padding .25s}
+.hrow:last-child{border-bottom:0}
+.hrow:hover{background:linear-gradient(90deg,rgba(253,248,233,.045),transparent);padding-left:8px}
+.hrow .y{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+.hrow .n{font-weight:600;font-size:15px;color:var(--ink);line-height:1.4}
+.hrow .o{font-size:12.5px;color:var(--soft);text-align:right}
+
+/* talks */
+.talk{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:22px 0;border-bottom:1px solid var(--line)}
+.talk:first-child{border-top:1px solid var(--line-2)}
+.talk .date{font-family:var(--mono);font-size:11.5px;color:var(--faint);padding-top:3px}
+.tag{display:block;margin-top:7px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.tag.inv{color:var(--blue-pale)}.tag.pos{color:var(--copper)}
+.tag::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:7px;transform:translateY(-1px)}
+.talk .venue{font-weight:700;font-size:14.5px;color:var(--ink)}
+.talk .title{font-family:var(--display);font-style:italic;font-size:20px;line-height:1.3;color:var(--soft);margin-top:4px;transition:color .3s}
+.talk:hover .title{color:var(--cream)}
+.talk .org{margin-top:7px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint)}
+
+/* skills */
+.kit{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+.kit .row{grid-template-columns:170px 1fr;align-items:baseline;padding:16px 0}
+.kit .row .k::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);margin-right:10px}
+.items{display:flex;flex-wrap:wrap;gap:6px 0;font-weight:500;font-size:15px;color:var(--ink)}
+.items span{transition:color .2s}
+.items span:not(:last-child)::after{content:"·";margin:0 11px;color:var(--faint)}
+.items span:hover{color:var(--copper)}
+
+/* footer */
+footer{padding:clamp(100px,18vh,190px) 0 40px}
+footer h2{font-size:clamp(40px,5.2vw,76px)}
+footer h2 em{background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
+footer .lede{margin-bottom:34px}
+.f-links{margin-top:54px;display:flex;flex-wrap:wrap;gap:28px;font-family:var(--mono);font-size:12px;color:var(--soft)}
+.f-links a{border-bottom:1px solid var(--line-2);transition:color .2s,border-color .2s}
+.f-links a:hover{color:var(--cream);border-color:var(--cream)}
+.f-bottom{margin-top:46px;padding-top:20px;position:relative;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  font-family:var(--mono);font-size:11px;color:var(--faint)}
+.f-bottom::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--ramp);opacity:.85}
+
+/* ---------- narrow screens: the figure moves behind the text ---------- */
+@media(max-width:1040px){
+  :root{--rail:clamp(20px,5vw,40px);--colw:calc(100vw - 2*var(--rail))}
+  .axis,.plate-cap,.cue,.spec{display:none}
+  .scope{padding:16px 16px 12px}
+  #plate{opacity:.42}
+  .col{max-width:700px}
+  .topbar{display:flex;position:fixed;z-index:6;top:0;left:0;right:0;justify-content:space-between;align-items:center;
+    padding:13px var(--rail);background:rgba(3,3,4,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .topbar .n{font-family:var(--display);font-size:19px}
+  .topbar .n em{font-style:italic;background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .topbar a.c{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+  header{padding:90px 0 0}
+  .pin{min-height:0;display:block}
+
+  section,footer{background:linear-gradient(180deg,transparent,rgba(3,3,4,.62) 90px,rgba(3,3,4,.62) calc(100% - 90px),transparent)}
 }
-.fact-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--u),var(--g),var(--r),var(--i),var(--z))}
-.fact{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
-.fact:last-child{border-bottom:0}
-.fact .k{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--ink-faint);text-transform:uppercase}
-.fact .v{font-weight:600;text-align:right;color:var(--ink)}
-@media(max-width:820px){.about-grid{grid-template-columns:1fr}}
-
-/* ---------- education timeline ---------- */
-.timeline{position:relative;margin-top:8px}
-.timeline::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;
-  background:linear-gradient(var(--u),var(--g),var(--r))}
-.t-item{position:relative;padding:0 0 44px 44px}
-.t-item:last-child{padding-bottom:0}
-.t-item::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;border-radius:50%;
-  background:var(--paper);border:3px solid var(--u);box-shadow:0 0 12px var(--u);transition:transform .25s ease}
-.t-item:nth-child(2)::before{border-color:var(--g);box-shadow:0 0 12px var(--g)}
-.t-item:nth-child(3)::before{border-color:var(--r);box-shadow:0 0 12px var(--r)}
-.t-item:hover::before{transform:scale(1.25)}
-.t-date{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase}
-.t-title{font-family:var(--display);font-size:24px;font-weight:500;margin:6px 0 4px;color:var(--ink)}
-.t-sub{color:var(--ink-soft);font-size:15.5px}
-.t-detail{margin-top:12px;background:var(--paper-raised);border:1px solid var(--line-bright);
-  border-radius:14px;padding:16px 20px;font-size:14.5px;color:var(--ink-soft)}
-.t-detail .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--ink-faint);display:block;margin-bottom:4px}
-.t-detail em{color:var(--ink);font-style:italic;font-family:var(--display);font-size:15.5px}
-
-/* ---------- research / publication ---------- */
-.pub-card{
-  background:linear-gradient(165deg,#0D111D, #070A12);
-  border:1px solid var(--line-bright);border-radius:22px;
-  padding:clamp(28px,4.5vw,48px);
-  position:relative;overflow:hidden;
-  transition:box-shadow .3s ease,transform .3s ease,border-color .3s ease;
-  display:grid;grid-template-columns:minmax(0,1fr) 310px;
-  gap:clamp(24px,4vw,48px);align-items:center;
-  box-shadow:0 20px 55px rgba(0,0,0,.55);
+@media(max-width:640px){
+  .readout{grid-template-columns:1fr}
+  .readout div{padding-bottom:4px}
+  .feature{grid-template-columns:1fr}
+  .theme{grid-template-columns:1fr;gap:8px}
+  .hrow{grid-template-columns:1fr;gap:1px}
+  .hrow .o{text-align:left}
+  .talk{grid-template-columns:1fr;gap:6px}
+  .talk .date{display:flex;gap:14px;align-items:center}
+  .tag{margin-top:0}
+  .row,.kit .row{grid-template-columns:1fr;gap:4px}
 }
-.pub-card:hover{
-  box-shadow:0 24px 65px rgba(54,214,158,.12), 0 0 40px rgba(157,123,255,.1);
-  border-color:rgba(157,123,255,.45);
-  transform:translateY(-3px);
-}
-.pub-viz{display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;z-index:2}
-#gsa{width:100%;max-width:310px;height:auto;display:block}
-.pub-viz .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;
-  color:var(--ink-faint);text-transform:uppercase;text-align:center;line-height:1.7}
-.pub-viz .cap-hover{opacity:.65;transition:opacity .3s,color .3s}
-.pub-card:hover .cap-hover{opacity:1;color:var(--g)}
-@media(max-width:900px){
-  .pub-card{grid-template-columns:1fr}
-  .pub-viz{order:2;margin-top:6px}
-}
-.pub-card .glow{position:absolute;right:-90px;top:-90px;width:320px;height:320px;border-radius:50%;
-  background:radial-gradient(circle,rgba(157,123,255,.18),transparent 70%);pointer-events:none}
-.pub-kicker{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--g);font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:9px}
-.pub-kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 10px var(--g)}
-.pub-title{font-family:var(--display);font-size:clamp(22px,3.2vw,30px);font-weight:500;line-height:1.25;max-width:720px;color:#fff}
-.pub-authors{margin-top:14px;color:var(--ink-soft);font-size:15.5px}
-.pub-authors strong{color:#fff}
-.pub-ref{margin-top:6px;font-family:var(--mono);font-size:13px;color:var(--ink-faint)}
-.pub-blurb{margin-top:20px;color:var(--ink-soft);max-width:680px}
-.pub-link{display:inline-flex;align-items:center;gap:8px;margin-top:24px;font-weight:600;font-size:15px;
-  color:#fff;border-bottom:2px solid var(--g);padding-bottom:2px;transition:gap .2s ease,color .2s}
-.pub-link:hover{gap:13px;color:var(--g)}
-
-.research-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
-.r-chip{background:var(--paper-raised);border:1px solid var(--line);border-radius:16px;padding:22px 24px;
-  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
-.r-chip:hover{transform:translateY(-4px);border-color:var(--line-bright);box-shadow:0 14px 36px rgba(0,0,0,.45)}
-.r-chip h3{font-family:var(--display);font-weight:500;font-size:19px;margin-bottom:6px;color:#fff}
-.r-chip p{font-size:14px;color:var(--ink-soft);line-height:1.55}
-.r-chip .bar{width:30px;height:3px;border-radius:2px;margin-bottom:14px;box-shadow:0 0 12px currentColor}
-.r-chip-link{display:inline-block;margin-top:10px;font-size:13.5px;font-weight:600;color:var(--i)}
-@media(max-width:820px){.research-strip{grid-template-columns:1fr}}
-
-/* ---------- honors ---------- */
-.honor-feature{
-  display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;
-}
-.honor-big{
-  background:var(--paper-raised);border:1px solid var(--line-bright);border-radius:20px;
-  padding:30px;position:relative;overflow:hidden;
-  transition:transform .25s ease,box-shadow .25s ease;
-}
-.honor-big:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.5)}
-.honor-big .year{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;color:var(--ink-faint)}
-.honor-big h3{font-family:var(--display);font-size:23px;font-weight:500;margin:10px 0 6px;line-height:1.25;color:#fff}
-.honor-big p{font-size:14.5px;color:var(--ink-soft)}
-.honor-big::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
-.honor-big.hu::after{background:var(--r);box-shadow:0 0 14px var(--r)}
-.honor-big.hg::after{background:var(--u);box-shadow:0 0 14px var(--u)}
-.honor-list{display:grid;gap:0;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--paper-raised)}
-.honor-row{display:grid;grid-template-columns:110px 1fr auto;gap:16px;align-items:baseline;
-  padding:17px 24px;border-bottom:1px solid var(--line);transition:background .2s}
-.honor-row:last-child{border-bottom:0}
-.honor-row:hover{background:rgba(255,255,255,.03)}
-.honor-row .y{font-family:var(--mono);font-size:12.5px;color:var(--ink-faint)}
-.honor-row .n{font-weight:600;font-size:15.5px;color:var(--ink)}
-.honor-row .o{font-size:13.5px;color:var(--ink-soft);text-align:right}
-@media(max-width:820px){
-  .honor-feature{grid-template-columns:1fr}
-  .honor-row{grid-template-columns:1fr;gap:2px}
-  .honor-row .o{text-align:left}
-}
-
-/* ---------- talks ---------- */
-.talk-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.talk{background:var(--paper-raised);border:1px solid var(--line);border-radius:18px;padding:24px;
-  transition:transform .25s ease,border-color .25s,box-shadow .25s}
-.talk:hover{transform:translateY(-4px);border-color:var(--line-bright);box-shadow:0 14px 36px rgba(0,0,0,.45)}
-.talk .where{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
-.talk .venue{font-weight:700;font-size:14px;letter-spacing:.02em;color:#fff}
-.talk .date{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
-.talk .title{font-family:var(--display);font-style:italic;font-size:16.5px;line-height:1.45;color:var(--ink-soft)}
-.talk .org{margin-top:12px;font-size:12.5px;font-family:var(--mono);color:var(--ink-faint);letter-spacing:.04em}
-.talk-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  padding:3px 10px;border-radius:999px;margin-bottom:12px}
-.tag-invited{background:rgba(157,123,255,.15);color:var(--u);border:1px solid rgba(157,123,255,.3)}
-.tag-poster{background:rgba(54,214,158,.14);color:var(--g);border:1px solid rgba(54,214,158,.3)}
-@media(max-width:820px){.talk-grid{grid-template-columns:1fr}}
-
-/* ---------- skills ---------- */
-.skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-.skill-block{background:var(--paper-raised);border:1px solid var(--line);border-radius:18px;padding:26px}
-.skill-block h3{font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--ink-faint);margin-bottom:16px;display:flex;align-items:center;gap:9px}
-.skill-block h3 .swatch{width:9px;height:9px;border-radius:50%;box-shadow:0 0 8px currentColor}
-.pills{display:flex;flex-wrap:wrap;gap:9px}
-.pill{font-size:13.5px;font-weight:600;padding:7px 15px;border-radius:999px;
-  border:1px solid var(--line-bright);background:var(--paper);color:var(--ink);
-  transition:transform .18s ease,border-color .18s,background .18s,box-shadow .18s;cursor:default}
-.pill:hover{transform:translateY(-2px);border-color:var(--u);background:#121726;box-shadow:0 0 16px rgba(157,123,255,.25)}
-@media(max-width:720px){.skill-grid{grid-template-columns:1fr}}
-
-/* ---------- footer / contact ---------- */
-footer{position:relative;overflow:hidden;background:#020306;color:#EDEEF3;
-  padding:clamp(85px,11vw,135px) 0 44px}
-footer h2{color:#fff;max-width:none}
-footer .f-lede{color:#B9C2D9;max-width:520px;margin-top:10px;margin-bottom:36px}
-.f-actions{display:flex;flex-wrap:wrap;gap:14px}
-.f-btn{border-color:rgba(255,255,255,.45);color:#fff}
-.f-btn:hover{background:#fff;color:#04050A}
-.f-links{margin-top:56px;display:flex;flex-wrap:wrap;gap:30px;
-  font-family:var(--mono);font-size:13px;color:#9AA4BE}
-.f-links a{border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
-.f-links a:hover{color:#fff;border-color:#fff}
-.f-bottom{margin-top:50px;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);
-  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
-  font-size:12.5px;color:#7C859E;font-family:var(--mono)}
-footer .spectrum{position:absolute;top:0;left:0;right:0;z-index:3}
-#cluster{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
-.f-content{position:relative;z-index:2}
-@media(max-width:900px){#cluster{opacity:.65}}
-
-/* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
   html{scroll-behavior:auto}
   .reveal{opacity:1;transform:none}
   h1 .line span{transform:none}
-  .hero-eyebrow,.hero-sub,.hero-actions,.hero-meta,.scroll-cue{opacity:1}
+  .eyebrow,.hero-sub,.actions,.readout,.cue{opacity:1}
 }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <a class="nav-name" href="#top"><span class="dot"></span>B. D. Hutchinson</a>
-    <div class="nav-links">
-      <a href="#about">About</a>
-      <a href="#education">Education</a>
-      <a href="#research">Research</a>
-      <a href="#honors">Honors</a>
-      <a href="#talks">Talks</a>
-      <a href="#contact">Contact</a>
-    </div>
-  </div>
+<canvas id="plate" aria-hidden="true"></canvas>
+<div class="plate-cap" id="cap" aria-hidden="true">
+  <b id="capN">Plate I</b><i id="capT">A field of stars, one filter at a time.</i>
+  <div class="bar">hot <span class="r"></span> cool</div>
+</div>
+
+<button class="spec" type="button" aria-label="Show the light of the hot star"><span>Hot</span></button>
+<button class="spec" type="button" aria-label="Show the light of the Sun-like star"><span>Sun-like</span></button>
+<button class="spec" type="button" aria-label="Show the light of the cool star"><span>Cool</span></button>
+
+<nav class="axis" id="axis" aria-label="Sections">
+  <a class="name" href="#top">B. D. Hutchinson<em>.</em></a>
+  <div class="spine"></div><div class="minor"></div>
+  <a href="#about" data-s="about">About</a>
+  <a href="#education" data-s="education">Education</a>
+  <a href="#research" data-s="research">Research</a>
+  <a href="#honors" data-s="honors">Honors</a>
+  <a href="#talks" data-s="talks">Talks</a>
+  <a href="#contact" data-s="contact">Contact</a>
+  <span class="mark" id="mark"></span>
 </nav>
+<div class="topbar"><a class="n" href="#top">B. D. Hutchinson<em>.</em></a><a class="c" href="#contact">Contact</a></div>
 
 <header id="top">
-  <canvas id="sky" aria-hidden="true"></canvas>
-  <div class="hero-vignette" aria-hidden="true"></div>
-  <div class="wrap hero-content">
-    <p class="hero-eyebrow">Applied Math &amp; Computational Science · Astronomy · Philadelphia</p>
+ <div class="pin">
+  <div class="col">
+    <p class="eyebrow">Applied Math &amp; Computational Science · Astronomy · Philadelphia</p>
     <h1>
       <span class="line"><span>Bradley D.</span></span>
       <span class="line"><span>Hutchinson<em>.</em></span></span>
     </h1>
     <p class="hero-sub">I build artificial intelligence that learns from <strong>how the Universe is measured</strong>. My research develops measurement-constrained models for extracting physical structure from massive photometric surveys.</p>
-    <div class="hero-actions">
-      <a class="btn btn-solid" href="#research">See my research ↓</a>
-      <a class="btn btn-ghost" href="mailto:bhutchin@upenn.edu">Get in touch</a>
+    <div class="actions">
+      <a class="lnk" href="#research">See my research ↓</a>
+      <a class="lnk q" href="mailto:bhutchin@upenn.edu">Get in touch</a>
     </div>
-    <div class="hero-meta">
+    <div class="readout">
       <div><span class="k">Now</span><span class="v">AMCS Ph.D. @ Penn</span></div>
       <div><span class="k">Fellowship</span><span class="v">DOE CSGF, 2026–2030</span></div>
       <div><span class="k">Latest</span><span class="v">The Astronomical Journal, 170, 255</span></div>
     </div>
   </div>
-  <div class="scroll-cue">Scroll</div>
+  <div class="cue">Scroll</div>
+ </div>
+ <div class="col spectrum" id="spectrum"></div>
+ <div class="col scope-wrap">
+    <div class="scope" id="scope">
+      <div class="sc-row"><span class="sc-k">Filter</span>
+        <div class="chips" id="filters">
+<button type="button" data-f="6">white</button><button type="button" data-f="0" style="--c:#8FD9C4">g</button><button type="button" data-f="1" style="--c:#F4B06A">r</button><button type="button" data-f="2" style="--c:#EE7D5E">i</button><button type="button" data-f="3" style="--c:#D0608A">z</button><button type="button" data-f="4" style="--c:#A068B0">y</button><button type="button" data-f="5">all</button>
+        </div></div>
+      <div class="sc-row"><span class="sc-k">Star</span>
+        <div class="chips" id="stars">
+          <button type="button" style="--c:#7C9EE2">Hot</button><button type="button" style="--c:#FDF8E9">Sun-like</button><button type="button" style="--c:#E7B387">Cool</button>
+        </div></div>
+      <svg id="sed" viewBox="0 0 320 138" role="img" aria-label="Brightness of the selected star across five filters"></svg>
+      <p class="sc-cap"><span id="sedName"></span><br>Its light across the five filters.<i> Press a filter to hold it, and a star or its curve to change the star.</i></p>
+    </div>
+ </div>
 </header>
 
-<hr class="spectrum">
-
+<main>
 <section id="about">
-  <div class="wrap">
-    <div class="band-tag reveal"><span class="swatch" style="background:var(--u);color:var(--u)"></span>u-band · 354 nm · About</div>
-    <h2 class="reveal">Astronomer by training,<br><em>computational scientist</em> by method.</h2>
-    <div class="about-grid">
-      <div class="reveal">
-        <p>I'm an <strong>Applied Mathematics &amp; Computational Science (AMCS) Ph.D. student at the University of Pennsylvania</strong> and a <strong>Department of Energy Computational Science Graduate Fellow</strong>. I graduated from Indiana University with degrees in Astronomy/Astrophysics, Mathematics, and Physics.</p>
-        <p>My research sits where big survey astronomy meets representation learning and computational mathematics. Modern telescopes image billions of objects through many filters — far too many for any human to inspect. I build <strong>wavelength-aware, unsupervised methods</strong> that let the data organize itself, surfacing rare and anomalous objects hiding in plain sight and using this organization to produce products useful to astronomers.</p>
-        <p>Previously, I was an <strong>AstroAI Institute intern at the Center for Astrophysics | Harvard &amp; Smithsonian</strong>, working on mechanistic interpretability of the wavelength-aware autoencoder before starting my doctorate in Philadelphia.</p>
-      </div>
-      <aside class="fact-card reveal">
-        <div class="fact"><span class="k">Now</span><span class="v">AMCS Ph.D. Student, UPenn</span></div>
-        <div class="fact"><span class="k">Fellowship</span><span class="v">DOE CSGF Fellow</span></div>
-        <div class="fact"><span class="k">From</span><span class="v">Indiana University, '26</span></div>
-        <div class="fact"><span class="k">Degrees</span><span class="v">B.S. Astronomy/Astrophysics · B.S. Mathematics · B.A. Physics</span></div>
-        <div class="fact"><span class="k">Languages</span><span class="v">EN · ES · JA</span></div>
-      </aside>
+  <div class="col">
+    <div class="panel reveal"><b>A</b><span>About</span></div>
+    <h2 class="reveal">Astronomer by training, <em>computational scientist</em> by method.</h2>
+    <div class="prose reveal">
+      <p>I'm an <strong>Applied Mathematics &amp; Computational Science (AMCS) Ph.D. student at the University of Pennsylvania</strong> and a <strong>Department of Energy Computational Science Graduate Fellow</strong>. I graduated from Indiana University with degrees in Astronomy/Astrophysics, Mathematics, and Physics.</p>
+      <p>My research sits where big survey astronomy meets representation learning and computational mathematics. Modern telescopes image billions of objects through many filters — far too many for any human to inspect. I build <strong>wavelength-aware, unsupervised methods</strong> that let the data organize itself, surfacing rare and anomalous objects hiding in plain sight and using this organization to produce products useful to astronomers.</p>
+      <p>Previously, I was an <strong>AstroAI Institute intern at the Center for Astrophysics | Harvard &amp; Smithsonian</strong>, working on mechanistic interpretability of the wavelength-aware autoencoder before starting my doctorate in Philadelphia.</p>
     </div>
+    <p class="tcap reveal">Table 1 · At a glance</p>
+    <aside class="table reveal">
+      <div class="row"><span class="k">Now</span><span class="v">AMCS Ph.D. Student, UPenn</span></div>
+      <div class="row"><span class="k">Fellowship</span><span class="v">DOE CSGF Fellow</span></div>
+      <div class="row"><span class="k">From</span><span class="v">Indiana University, '26</span></div>
+      <div class="row"><span class="k">Degrees</span><span class="v">B.S. Astronomy/Astrophysics · B.S. Mathematics · B.A. Physics</span></div>
+      <div class="row"><span class="k">Languages</span><span class="v">EN · ES · JA</span></div>
+    </aside>
   </div>
 </section>
 
 <section id="education">
-  <div class="wrap">
-    <div class="band-tag reveal"><span class="swatch" style="background:var(--g);color:var(--g)"></span>g-band · 477 nm · Education</div>
-    <h2 class="reveal">Indiana &#8594; Philadelphia</h2>
-    <p class="section-lede reveal">From a full-ride at Indiana to a federally funded doctorate in Applied Mathematics &amp; Computational Science at Penn.</p>
-    <div class="timeline">
-      <div class="t-item reveal">
-        <div class="t-date">Aug. 2026 – Present</div>
-        <div class="t-title">University of Pennsylvania</div>
-        <div class="t-sub">Ph.D., Applied Mathematics &amp; Computational Science — supported by the DOE Computational Science Graduate Fellowship</div>
+  <div class="col">
+    <div class="panel reveal"><b>B</b><span>Education</span></div>
+    <h2 class="reveal">Indiana <em>&#8594;</em> Philadelphia</h2>
+    <p class="lede reveal">From a full-ride at Indiana to a federally funded doctorate in Applied Mathematics &amp; Computational Science at Penn.</p>
+    <div class="track">
+      <div class="stop reveal" style="--c:var(--blue)">
+        <div class="d">Aug. 2026 – Present</div>
+        <div class="t">University of Pennsylvania</div>
+        <div class="s">Ph.D., Applied Mathematics &amp; Computational Science — supported by the DOE Computational Science Graduate Fellowship</div>
       </div>
-      <div class="t-item reveal">
-        <div class="t-date">Summer 2026</div>
-        <div class="t-title">Center for Astrophysics | Harvard &amp; Smithsonian</div>
-        <div class="t-sub">Research Intern — AstroAI Institute</div>
-        <div class="t-detail">
+      <div class="stop reveal" style="--c:var(--cream)">
+        <div class="d">Summer 2026</div>
+        <div class="t">Center for Astrophysics | Harvard &amp; Smithsonian</div>
+        <div class="s">Research Intern — AstroAI Institute</div>
+        <div class="note">
           <span class="k">Advisors · Mike Smith &amp; Cecilia Garraffo</span>
           <em>Mechanistic interpretability of the wavelength-aware autoencoder</em>
         </div>
       </div>
-      <div class="t-item reveal">
-        <div class="t-date">Aug. 2022 – May 2026</div>
-        <div class="t-title">Indiana University</div>
-        <div class="t-sub">B.S. Astronomy/Astrophysics with Honors · B.S. Mathematics · B.A. Physics<br>Jesse H. &amp; Beulah Chanley Cox Scholar — full ride with a 1,200-hour work-study commitment</div>
-        <div class="t-detail">
+      <div class="stop reveal" style="--c:var(--copper)">
+        <div class="d">Aug. 2022 – May 2026</div>
+        <div class="t">Indiana University</div>
+        <div class="s">B.S. Astronomy/Astrophysics with Honors · B.S. Mathematics · B.A. Physics<br>Jesse H. &amp; Beulah Chanley Cox Scholar — full ride with a 1,200-hour work-study commitment</div>
+        <div class="note">
           <span class="k">Honors thesis · advised by Catherine A. Pilachowski</span>
           <em>A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor Photometric Surveys</em>
         </div>
@@ -485,160 +437,147 @@ footer .spectrum{position:absolute;top:0;left:0;right:0;z-index:3}
 </section>
 
 <section id="research">
-  <div class="wrap">
-    <div class="band-tag reveal"><span class="swatch" style="background:var(--r);color:var(--r)"></span>r-band · 623 nm · Research</div>
+  <div class="col">
+    <div class="panel reveal"><b>C</b><span>Research</span></div>
     <h2 class="reveal">Letting surveys <em>sort themselves.</em></h2>
-    <p class="section-lede reveal">First-author work published in The Astronomical Journal and interviewed by the American Astronomical Society.</p>
+    <p class="lede reveal">First-author work published in The Astronomical Journal and interviewed by the American Astronomical Society.</p>
 
-    <article class="pub-card reveal" id="pubcard">
-      <div class="glow"></div>
+    <article class="pub reveal" id="pubcard" tabindex="0">
+      <div class="pub-viz">
+        <canvas id="gsa" width="640" height="240" aria-label="Animated diagram: five passbands compress through a two-dimensional bottleneck and are reconstructed"></canvas>
+        <p class="cap">5 → 4 → 3 → 2 → 3 → 4 → 5 <span class="cap-hover">· hover: gates choose what speaks</span></p>
+      </div>
       <div class="pub-main">
-        <div class="pub-kicker">Publication · 2025</div>
+        <div class="kicker">Publication · 2025</div>
         <h3 class="pub-title">A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</h3>
         <p class="pub-authors"><strong>Hutchinson, B. D.</strong>, Pilachowski, C. A., &amp; Johnson, C. I.</p>
         <p class="pub-ref">The Astronomical Journal, 170, 255 · doi:10.3847/1538-3881/adf437</p>
         <p class="pub-blurb">A compact, gated state autoencoder for multicolor photometry. Learned gates decide, object by object, which passbands carry signal and which are noise, compressing each source into a low-dimensional map where physical structure — and the anomalies that break it — emerge without labels.</p>
-        <a class="pub-link" href="https://doi.org/10.3847/1538-3881/adf437" target="_blank" rel="noopener">Read the paper <span>→</span></a>
-      </div>
-      <div class="pub-viz">
-        <canvas id="gsa" width="300" height="250" aria-label="Animated diagram: five passbands compress through a two-dimensional bottleneck and are reconstructed"></canvas>
-        <p class="cap">5 → 4 → 3 → 2 → 3 → 4 → 5 <span class="cap-hover"><br>hover: gates choose what speaks</span></p>
+        <a class="lnk" href="https://doi.org/10.3847/1538-3881/adf437" target="_blank" rel="noopener">Read the paper <span>→</span></a>
       </div>
     </article>
 
-    <div class="research-strip">
-      <div class="r-chip reveal">
-        <div class="bar" style="background:var(--u);color:var(--u)"></div>
+    <div class="themes">
+      <div class="theme reveal" style="--c:var(--blue)">
         <h3>Anomaly detection</h3>
         <p>Finding the rare gems — objects that don't fit any known class — in billion-row photometric catalogs.</p>
       </div>
-      <div class="r-chip reveal">
-        <div class="bar" style="background:var(--g);color:var(--g)"></div>
+      <div class="theme reveal" style="--c:var(--cream)">
         <h3>Gated representation learning</h3>
         <p>Tiny gated state autoencoders — a few hundred parameters — that reweight each passband per object and compress multiband light into interpretable, low-dimensional embeddings.</p>
       </div>
-      <a class="r-chip reveal" href="https://www.youtube.com/watch?v=LM9TF7DOo4M" target="_blank" rel="noopener">
-        <div class="bar" style="background:var(--i);color:var(--i)"></div>
+      <a class="theme reveal" style="--c:var(--copper)" href="https://www.youtube.com/watch?v=LM9TF7DOo4M" target="_blank" rel="noopener">
         <h3>Interviewed by the AAS</h3>
-        <p>The American Astronomical Society's author interview on the paper and the wavelength-aware approach behind it.</p>
-        <span class="r-chip-link">Watch the interview →</span>
+        <p>The American Astronomical Society's author interview on the paper and the wavelength-aware approach behind it.<br><span class="go">Watch the interview →</span></p>
       </a>
     </div>
   </div>
 </section>
 
 <section id="honors">
-  <div class="wrap">
-    <div class="band-tag reveal"><span class="swatch" style="background:var(--i);color:var(--i)"></span>i-band · 763 nm · Honors &amp; Awards</div>
+  <div class="col">
+    <div class="panel reveal"><b>D</b><span>Honors &amp; Awards</span></div>
     <h2 class="reveal">Honors &amp; <em>support.</em></h2>
-    <p class="section-lede reveal">I'm grateful for the mentors, departments, and programs that have backed this work.</p>
+    <p class="lede reveal">I'm grateful for the mentors, departments, and programs that have backed this work.</p>
 
-    <div class="honor-feature">
-      <div class="honor-big hu reveal">
-        <span class="year">2026 – 2030</span>
+    <div class="feature">
+      <div class="big reveal" style="--c:var(--copper)">
+        <span class="y">2026 – 2030</span>
         <h3>DOE Computational Science Graduate Fellowship</h3>
         <p>U.S. Department of Energy — one of the nation's most competitive fellowships for doctoral computational research.</p>
       </div>
-      <div class="honor-big hg reveal">
-        <span class="year">2025</span>
+      <div class="big reveal" style="--c:var(--blue)">
+        <span class="y">2025</span>
         <h3>Distinguished Undergraduate</h3>
         <p>Universities Space Research Association (USRA).</p>
       </div>
     </div>
 
-    <div class="honor-list reveal">
-      <div class="honor-row"><span class="y">2024 · 25 · 26</span><span class="n">Hollis &amp; Grete Johnson Undergraduate Research Prize</span><span class="o">IU Astronomy</span></div>
-      <div class="honor-row"><span class="y">2024</span><span class="n">Hugh Brown Memorial Scholarship</span><span class="o">IU Physics</span></div>
-      <div class="honor-row"><span class="y">2024</span><span class="n">Barry Goldwater Scholar Nominee</span><span class="o">IU College of Arts &amp; Sciences</span></div>
-      <div class="honor-row"><span class="y">2022 – 26</span><span class="n">Cox Scholarship (full ride)</span><span class="o">Cox Scholars Program</span></div>
-      <div class="honor-row"><span class="y">2026</span><span class="n">AstroAI Institute Summer Internship</span><span class="o">CfA | Harvard &amp; Smithsonian</span></div>
-      <div class="honor-row"><span class="y">2025</span><span class="n">Fleischer Summer Research Scholarship</span><span class="o">IU College of Arts &amp; Sciences</span></div>
-      <div class="honor-row"><span class="y">2024</span><span class="n">Alice Palma Summer Undergraduate Research Program</span><span class="o">IU Astronomy</span></div>
-      <div class="honor-row"><span class="y">2023</span><span class="n">US ATLAS Summer Undergraduate Program for Exceptional Researchers</span><span class="o">DOE/CERN</span></div>
+    <p class="tcap reveal">Table 2 · Scholarships, prizes &amp; programs</p>
+    <div class="table reveal">
+      <div class="hrow"><span class="y">2024 · 25 · 26</span><span class="n">Hollis &amp; Grete Johnson Undergraduate Research Prize</span><span class="o">IU Astronomy</span></div>
+      <div class="hrow"><span class="y">2024</span><span class="n">Hugh Brown Memorial Scholarship</span><span class="o">IU Physics</span></div>
+      <div class="hrow"><span class="y">2024</span><span class="n">Barry Goldwater Scholar Nominee</span><span class="o">IU College of Arts &amp; Sciences</span></div>
+      <div class="hrow"><span class="y">2022 – 26</span><span class="n">Cox Scholarship (full ride)</span><span class="o">Cox Scholars Program</span></div>
+      <div class="hrow"><span class="y">2026</span><span class="n">AstroAI Institute Summer Internship</span><span class="o">CfA | Harvard &amp; Smithsonian</span></div>
+      <div class="hrow"><span class="y">2025</span><span class="n">Fleischer Summer Research Scholarship</span><span class="o">IU College of Arts &amp; Sciences</span></div>
+      <div class="hrow"><span class="y">2024</span><span class="n">Alice Palma Summer Undergraduate Research Program</span><span class="o">IU Astronomy</span></div>
+      <div class="hrow"><span class="y">2023</span><span class="n">US ATLAS Summer Undergraduate Program for Exceptional Researchers</span><span class="o">DOE/CERN</span></div>
     </div>
   </div>
 </section>
 
 <section id="talks">
-  <div class="wrap">
-    <div class="band-tag reveal"><span class="swatch" style="background:var(--z);color:var(--z)"></span>z-band · 913 nm · Presentations</div>
+  <div class="col">
+    <div class="panel reveal"><b>E</b><span>Presentations</span></div>
     <h2 class="reveal">Sharing the <em>work.</em></h2>
-    <p class="section-lede reveal">Five invited talks and two posters across CERN, STScI, Harvard, and the American Astronomical Society.</p>
-    <div class="talk-grid">
+    <p class="lede reveal">Five invited talks and two posters across CERN, STScI, Harvard, and the American Astronomical Society.</p>
+    <div class="talks">
       <div class="talk reveal">
-        <span class="talk-tag tag-invited">Invited</span>
-        <div class="where"><span class="venue">American Astronomical Society</span><span class="date">Dec 2025</span></div>
-        <p class="title">A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</p>
-        <p class="org">Journal Author Series</p>
+        <div class="date">Dec 2025<span class="tag inv">Invited</span></div>
+        <div><div class="venue">American Astronomical Society</div>
+          <p class="title">A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</p>
+          <p class="org">Journal Author Series</p></div>
       </div>
       <div class="talk reveal">
-        <span class="talk-tag tag-invited">Invited</span>
-        <div class="where"><span class="venue">IU Dept. of Astronomy</span><span class="date">Apr 2026</span></div>
-        <p class="title">A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</p>
-        <p class="org">Astronomy Honors Colloquium</p>
+        <div class="date">Apr 2026<span class="tag inv">Invited</span></div>
+        <div><div class="venue">IU Dept. of Astronomy</div>
+          <p class="title">A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</p>
+          <p class="org">Astronomy Honors Colloquium</p></div>
       </div>
       <div class="talk reveal">
-        <span class="talk-tag tag-invited">Invited</span>
-        <div class="where"><span class="venue">Space Telescope Science Institute</span><span class="date">Sep 2024</span></div>
-        <p class="title">Unsupervised Machine Learning Applied to a Large, Multiband, Photometric Survey</p>
-        <p class="org">DeepHST Meeting</p>
+        <div class="date">Sep 2024<span class="tag inv">Invited</span></div>
+        <div><div class="venue">Space Telescope Science Institute</div>
+          <p class="title">Unsupervised Machine Learning Applied to a Large, Multiband, Photometric Survey</p>
+          <p class="org">DeepHST Meeting</p></div>
       </div>
       <div class="talk reveal">
-        <span class="talk-tag tag-invited">Invited</span>
-        <div class="where"><span class="venue">US ATLAS @ CERN</span><span class="date">Aug 2023</span></div>
-        <p class="title">Electroweak Corrections on the ATLAS Vector Boson Scattering of W⁺W⁻</p>
-        <p class="org">SUPER Symposium</p>
+        <div class="date">Aug 2023<span class="tag inv">Invited</span></div>
+        <div><div class="venue">US ATLAS @ CERN</div>
+          <p class="title">Electroweak Corrections on the ATLAS Vector Boson Scattering of W⁺W⁻</p>
+          <p class="org">SUPER Symposium</p></div>
       </div>
       <div class="talk reveal">
-        <span class="talk-tag tag-poster">Poster</span>
-        <div class="where"><span class="venue">CfA | Harvard &amp; Smithsonian</span><span class="date">Jul 2025</span></div>
-        <p class="title">A Sequential Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</p>
-        <p class="org">AstroAI Workshop</p>
+        <div class="date">Jul 2025<span class="tag pos">Poster</span></div>
+        <div><div class="venue">CfA | Harvard &amp; Smithsonian</div>
+          <p class="title">A Sequential Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</p>
+          <p class="org">AstroAI Workshop</p></div>
       </div>
       <div class="talk reveal">
-        <span class="talk-tag tag-poster">Poster</span>
-        <div class="where"><span class="venue">IU Dept. of Astronomy</span><span class="date">Jul 2024</span></div>
-        <p class="title">Biases on the Determination of Relaxation Times of Globular Clusters</p>
-        <p class="org">Alice Palma Research Celebration</p>
+        <div class="date">Jul 2024<span class="tag pos">Poster</span></div>
+        <div><div class="venue">IU Dept. of Astronomy</div>
+          <p class="title">Biases on the Determination of Relaxation Times of Globular Clusters</p>
+          <p class="org">Alice Palma Research Celebration</p></div>
       </div>
     </div>
   </div>
 </section>
 
 <section id="skills">
-  <div class="wrap">
-    <div class="band-tag reveal"><span class="swatch" style="background:linear-gradient(90deg,var(--u),var(--z));color:var(--u)"></span>Broadband · Skills</div>
+  <div class="col">
+    <div class="panel reveal"><b>F</b><span>Skills</span></div>
     <h2 class="reveal">The <em>toolkit.</em></h2>
-    <div class="skill-grid" style="margin-top:36px">
-      <div class="skill-block reveal">
-        <h3><span class="swatch" style="background:var(--u);color:var(--u)"></span>Programming</h3>
-        <div class="pills"><span class="pill">Python</span><span class="pill">SQL</span><span class="pill">C/C++</span><span class="pill">LaTeX</span></div>
-      </div>
-      <div class="skill-block reveal">
-        <h3><span class="swatch" style="background:var(--g);color:var(--g)"></span>Scientific software</h3>
-        <div class="pills"><span class="pill">TensorFlow / Keras</span><span class="pill">NumPy</span><span class="pill">SciPy</span><span class="pill">pandas</span><span class="pill">scikit-learn</span><span class="pill">ROOT</span></div>
-      </div>
-      <div class="skill-block reveal">
-        <h3><span class="swatch" style="background:var(--r);color:var(--r)"></span>Applied Math &amp; ML</h3>
-        <div class="pills"><span class="pill">Anomaly detection</span><span class="pill">Representation learning</span><span class="pill">Mechanistic interpretability</span><span class="pill">Imbalanced datasets</span></div>
-      </div>
-      <div class="skill-block reveal">
-        <h3><span class="swatch" style="background:var(--z);color:var(--z)"></span>Languages</h3>
-        <div class="pills"><span class="pill">English — native</span><span class="pill">Spanish — professional</span><span class="pill">Japanese — beginner</span></div>
-      </div>
+    <div class="kit reveal" style="margin-top:34px">
+      <div class="row" style="--c:var(--blue)"><span class="k">Programming</span>
+        <div class="items"><span>Python</span><span>SQL</span><span>C/C++</span><span>LaTeX</span></div></div>
+      <div class="row" style="--c:var(--blue-pale)"><span class="k">Scientific software</span>
+        <div class="items"><span>TensorFlow / Keras</span><span>NumPy</span><span>SciPy</span><span>pandas</span><span>scikit-learn</span><span>ROOT</span></div></div>
+      <div class="row" style="--c:var(--sand)"><span class="k">Applied Math &amp; ML</span>
+        <div class="items"><span>Anomaly detection</span><span>Representation learning</span><span>Mechanistic interpretability</span><span>Imbalanced datasets</span></div></div>
+      <div class="row" style="--c:var(--copper-deep)"><span class="k">Languages</span>
+        <div class="items"><span>English — native</span><span>Spanish — professional</span><span>Japanese — beginner</span></div></div>
     </div>
   </div>
 </section>
+</main>
 
 <footer id="contact">
-  <hr class="spectrum">
-  <canvas id="cluster" aria-hidden="true"></canvas>
-  <div class="wrap f-content">
+  <div class="col">
     <h2 class="reveal">Let's find the <em>rare gems</em> together.</h2>
-    <p class="f-lede reveal">Open to research collaborations, talks, and conversations about applied mathematics and ML for survey astronomy.</p>
-    <div class="f-actions reveal">
-      <a class="btn btn-ghost f-btn" href="mailto:bhutchin@upenn.edu">bhutchin@upenn.edu</a>
-      <a class="btn btn-ghost f-btn" href="https://github.com/bradhutc" target="_blank" rel="noopener">github.com/bradhutc</a>
+    <p class="lede reveal">Open to research collaborations, talks, and conversations about applied mathematics and ML for survey astronomy.</p>
+    <div class="actions reveal" style="opacity:1;animation:none">
+      <a class="lnk" href="mailto:bhutchin@upenn.edu">bhutchin@upenn.edu</a>
+      <a class="lnk q" href="https://github.com/bradhutc" target="_blank" rel="noopener">github.com/bradhutc</a>
     </div>
     <div class="f-links reveal">
       <span>University of Pennsylvania · Philadelphia, PA</span>
@@ -646,679 +585,597 @@ footer .spectrum{position:absolute;top:0;left:0;right:0;z-index:3}
     </div>
     <div class="f-bottom">
       <span>© 2026 Bradley D. Hutchinson</span>
-      <span>Deep Field Survey · sections keyed to the ugriz bands, 354–913 nm</span>
+      <span>One field of stars, five arrangements · blue for hot light, copper for cool</span>
     </div>
   </div>
 </footer>
 
 <script>
-/* ---------- nav: translucent over the hero, dark glass after ---------- */
-const navEl = document.querySelector('nav');
-const heroEl = document.querySelector('header');
-function navState(){
-  navEl.classList.toggle('over-hero', scrollY < heroEl.offsetHeight - 70);
-}
-navState();
-addEventListener('scroll', navState, {passive:true});
-addEventListener('resize', navState);
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (x,a,b)=>Math.min(b,Math.max(a,x));
+const smooth = x => x*x*(3-2*x);
+const topOf = el => el.getBoundingClientRect().top + scrollY;   // position in the document
 
-/* ---------- scroll reveals ---------- */
-const io = new IntersectionObserver(entries=>{
-  for(const e of entries){
-    if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
-  }
-},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
-document.querySelectorAll('.reveal').forEach((el,i)=>{
-  el.style.transitionDelay = (i%4)*60+'ms';
-  io.observe(el);
-});
+/* ---------- reveals ---------- */
+const io = new IntersectionObserver(es=>{
+  for(const e of es) if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
+},{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(i%3)*70+'ms';io.observe(el)});
 
 /* ============================================================
-   1. HERO DEEP FIELD: Galaxies, Nebulae & Multi-Band Starfield
-   - Logarithmic spiral galaxies with glowing bulges, HII knots,
-     and 3D inclination + rotation
-   - 3D mouse-parallax across depth layers
-   - Bright foreground stars with JWST/HST diffraction spikes
-   - Occasional high-velocity shooting stars
+   THE PLATE
+   One population of stars. Each has a fixed color (its place on
+   the blue-cream-copper ramp) and a fixed brightness. Scrolling
+   moves every star between six arrangements of the same light.
+   In the first, the field is viewed one filter at a time, and
+   three stars can be pressed to show the shape of their light.
    ============================================================ */
 (function(){
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const c = document.getElementById('sky');
-  const ctx = c.getContext('2d');
-  let W, H, raf;
-  let stars = [], galaxies = [], nebulae = [], meteors = [];
-  let mx = 0, my = 0, tmx = 0, tmy = 0;
+  const cv = document.getElementById('plate'), ctx = cv.getContext('2d');
+  const capEl = document.getElementById('cap'), capN = document.getElementById('capN'), capT = document.getElementById('capT');
+  const scope = document.getElementById('scope');
+  const CAPS = [
+    ['Plate I','A field of stars, one filter at a time.'],
+    ['',''],   // (arrangement 1 is no longer shown)
+    ['Plate II','The same stars, by color and brightness.'],
+    ['Plate III','A spiral galaxy.'],
+    ['Plate IV','The sky in polar projection.'],
+    ['Plate V','A globular cluster, star by star.']
+  ];
+  // section -> arrangement
+  const ORDER = [['top',0],['about',0],['education',2],['research',2],['honors',3],['talks',3],['skills',4],['contact',5]];
 
-  window.addEventListener('pointermove', e => {
-    tmx = (e.clientX / innerWidth - 0.5) * 2;
-    tmy = (e.clientY / innerHeight - 0.5) * 2;
-  }, {passive:true});
+  const STOPS=[[0,102,134,204],[.16,124,158,226],[.32,161,190,238],[.5,253,248,233],[.66,247,223,178],[.82,231,179,135],[1,195,138,107]];
+  function ramp(t){
+    t = clamp(t,0,1);
+    for(let i=1;i<STOPS.length;i++){
+      if(t<=STOPS[i][0]){
+        const a=STOPS[i-1], b=STOPS[i], k=(t-a[0])/(b[0]-a[0]);
+        return [a[1]+(b[1]-a[1])*k|0, a[2]+(b[2]-a[2])*k|0, a[3]+(b[3]-a[3])*k|0];
+      }
+    }
+    return STOPS[6].slice(1);
+  }
+  let seed = 20250255;
+  const R = ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+  const G = ()=>{let u=0,v=0;while(!u)u=R();v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(6.2832*v)};
 
-  // Realistic stellar/photometric hues (O/B blue, A white, G/K gold, M red, u-band violet)
-  const STAR_PALETTE = [
-    {h:258, s:85, l:76}, // u-band violet
-    {h:218, s:92, l:82}, // O/B blue-white
-    {h:195, s:70, l:88}, // A white-cyan
-    {h:162, s:78, l:72}, // g-band teal
-    {h:38,  s:92, l:76}, // r-band amber/gold
-    {h:12,  s:85, l:70}, // i-band crimson
-    {h:328, s:75, l:72}  // z-band magenta
+  /* five filters and a blackbody for each star */
+  const FN=['g','r','i','z','y'], LAM=[481,617,752,866,962];
+  const BAND=[[400,550],[550,690],[690,820],[820,920],[920,1040]];
+  const TINT=[[143,217,196],[244,176,106],[238,125,94],[208,96,138],[160,104,176]];
+  const planck=(l,T)=>Math.pow(l/500,-5)/(Math.exp(1.4388e7/(l*T))-1);
+  const tempOf=s=>3000+7500*Math.pow(1-s,1.6);
+  /* globular clusters of the northern Galactic sky: name, l, b in degrees
+     (positions from the Harris catalogue, converted to Galactic coordinates) */
+  const GC=[['M3',42.21,78.71,1],['M53',332.97,79.76],['NGC 5466',42.15,73.59,1],['NGC 4147',252.85,77.19],
+    ['M5',3.86,46.80],['M13',59.01,40.91],['M92',68.34,34.86],['M12',15.72,26.31],['M14',21.32,14.80],
+    ['M107',3.37,23.01],['M4',350.97,15.97],['M68',299.63,36.05],['NGC 2419',180.37,25.24],['NGC 5897',342.95,30.29]];
+  const RP=.465;   // radius of the polar map: centre is b = +90°, rim is b = +2°
+  const polar=(l,b)=>{const rho=(90-b)/88*RP, a=l*Math.PI/180; return [.5-rho*Math.sin(a),.5+rho*Math.cos(a)]};
+  let gcN=0, XS=[];
+  // one position on the sky map: denser toward low latitude and toward the Galactic centre
+  function skyPoint(){
+    let rr=1,l=0;
+    for(let k=0;k<80;k++){
+      rr=Math.sqrt(R()); l=R()*6.2832;
+      const bb=(90-88*rr)*Math.PI/180, dl=Math.min(l,6.2832-l);
+      const w=(1/(Math.sin(bb)+.13))*(1+2.2*rr*Math.exp(-dl*dl/1.1))/19.5;
+      if(R()<w) break;
+    }
+    return [.5-RP*rr*Math.sin(l),.5+RP*rr*Math.cos(l)];
+  }
+  const SPEC=[
+    {s:.03,a:1,  x:.30,y:.16,sz:2.6,name:'Hot star'},
+    {s:.463,a:.8,x:.71,y:.30,sz:1.9,name:'Sun-like star'},
+    {s:1.0,a:.62,x:.41,y:.46,sz:1.5,name:'Cool star'}
   ];
 
-  function makeGalaxy(cfg){
-    const pts = [];
-    const arms = cfg.arms || 2;
-    const twist = cfg.twist || 4.2;
-    for(let i=0; i<cfg.count; i++){
-      // Core vs spiral arm distribution
-      const isCore = Math.random() < 0.24;
-      const u = Math.pow(Math.random(), isCore ? 2.4 : 1.15);
-      const r = u * cfg.radius;
-      const arm = i % arms;
-      const armOffset = (arm * Math.PI * 2) / arms;
-      const scatter = (Math.random() - 0.5) * (0.32 + 0.75 * u) + (isCore ? (Math.random()-0.5)*2.2 : 0);
-      const theta = u * twist + armOffset + scatter;
+  let hdrH=0, fEnd=1;
+  let W,H,P=[],px=0,py=0,side=1,mobile=false,anchors=[],yc=0,curCap=-1,raf;
+  let mx=0,my=0,tmx=0,tmy=0;
+  addEventListener('pointermove',e=>{tmx=(e.clientX/innerWidth-.5);tmy=(e.clientY/innerHeight-.5)},{passive:true});
 
-      // Color gradient: warm gold/amber bulge -> blue/violet spiral arms + pink HII knots
-      let hue, sat, light, size, alpha;
-      const isHII = !isCore && u > 0.25 && Math.random() < 0.065;
-      if(isCore){
-        hue = cfg.coreHue + (Math.random()-0.5)*18;
-        sat = 85; light = 78;
-        size = 0.8 + Math.random()*1.6;
-        alpha = 0.5 + Math.random()*0.45;
-      } else if(isHII){
-        hue = 330 + (Math.random()-0.5)*20; // H-alpha star-forming region
-        sat = 95; light = 72;
-        size = 1.4 + Math.random()*2.0;
-        alpha = 0.65 + Math.random()*0.35;
+  function makeStars(){
+    seed = 20250255; gcN = 0;
+    const n = mobile ? 1500 : 2700;
+    P = [];
+    for(let i=0;i<n;i++){
+      // few hot stars, many near the turn-off, many on the lower main sequence
+      const pick=R(), q=R();
+      let s = pick<.09 ? q*.30 : pick<.20 ? .30+q*.14 : pick<.57 ? clamp(.53+G()*.045,.44,.62) : .62+q*.38;
+      let au = R();
+      const sp = i<3 ? SPEC[i] : null;
+      if(sp){ s=sp.s; au=Math.pow(sp.a,1/2.4); }
+      const a = Math.pow(au,2.4);
+      const p = {s,a,field:R()<.13,ph:R()*6.283,d:R(),sw:(R()-.5),col:ramp(s),T:[],sz:sp?sp.sz:1,spec:sp?i:-1};
+      p.vr = !sp && (p.ph*997%1)<.07;   // the variable stars
+      const T=tempOf(s), fl=LAM.map(l=>planck(l,T)), fm=Math.max(...fl);
+      p.F=fl.map(v=>Math.pow(v/fm,.9));
+      const r3=R(),r4=R(),r5=R(),g1=G(),g2=G(),th=R()*6.283;
+      let x,y;
+
+      /* I — a field of stars */
+      if(sp){ x=sp.x; y=sp.y; }
+      else if(mobile){ x=-.1+R()*1.2; y=-.45+R()*1.9; }
+      else if(R()<.6){ x=-.14+R()*1.28; y=-.16+R()*1.32; }
+      else{ x=-1.75+R()*2.95; y=-.35+R()*1.7; }
+      p.T.push([x,y]);
+
+      /* II — color left to right, apparent brightness up: a cloud */
+      x=.09+.82*s+g1*.014; y=.92-.82*Math.pow(au,1.15)+g2*.022;
+      p.T.push([x,y]);
+
+      /* III — remove distance and the sequences appear */
+      if(s>.6&&r3<.22){
+        if(r4<.38){ x=.6+g1*.018; y=.43+g2*.014; }
+        else{ const t=(r4-.38)/.62; x=.61+.2*t+g1*.01; y=.42-.34*Math.pow(t,1.5)+g2*.012; }
+      } else if(s<.44&&r3<.2){ x=.14+.3*r4+g1*.008; y=.76+.15*r4+g2*.012; }
+      else{ x=.12+.74*s+g1*.011; y=.13+.74*(.55*s+.45*Math.pow(s,2.4))+g2*.017-(r5<.12?.03:0); }
+      p.T.push([x,y]);
+
+      /* IV — spiral galaxy: warm core and old disc, blue-white arms */
+      if(s>=.56){
+        const r = r3<.6 ? Math.abs(g1)*.055*(1+1.2*(s-.56)) : .04-.1*Math.log(1-r4*.97);
+        x=.5+Math.min(r,.47)*Math.cos(th); y=.5+Math.min(r,.47)*Math.sin(th)*.86;
+      } else { const t=Math.pow(r4,.75), r=.05+.41*t, arm=(r3<.5?0:Math.PI);
+        const a2=arm+2.5*Math.log(1+5*t)+g1*(.13+.12*t); x=.5+r*Math.cos(a2)+g2*.006; y=.5+r*Math.sin(a2)*.86; }
+      p.T.push([x,y]);
+
+      /* V — the northern Galactic sky, pole at the centre. Longitude 0 (toward the
+         Galactic centre) is at the bottom. Stars thicken toward low latitude and
+         toward the centre; a few real globular clusters sit at their true positions. */
+      if(s>.44&&gcN<GC.length*(mobile?11:16)){
+        const c=GC[gcN++%GC.length], q=polar(c[1],c[2]), sg=.0042*Math.sqrt(-Math.log(1-r4*.98));
+        x=q[0]+sg*Math.cos(th); y=q[1]+sg*Math.sin(th);
       } else {
-        hue = cfg.armHue + (Math.random()-0.5)*32 - u*18;
-        sat = 80; light = 74;
-        size = 0.55 + Math.random()*1.35 * (1 - u*0.35);
-        alpha = (0.22 + Math.random()*0.55) * (1 - u*0.45);
+        const q=skyPoint(); x=q[0]; y=q[1];
       }
+      p.T.push([x,y]);
 
-      pts.push({r, theta, size, hue, sat, light, alpha, isHII});
+      /* VI — globular cluster, dense to the very centre */
+      if(p.field&&!sp){ x=-1.7+R()*2.9; y=-.35+R()*1.7; }
+      else{ const u=R()*.99+.000004, r=Math.min(.58,.075/Math.sqrt(Math.pow(u,-2/3)-1)); x=.5+r*Math.cos(th); y=.5+r*Math.sin(th); }
+      p.T.push([x,y]);
+      P.push(p);
     }
-    return {...cfg, pts};
+    // many more, fainter stars that belong only to the sky map
+    XS=[];
+    for(let i=0,m=mobile?2600:6500;i<m;i++){
+      const q=skyPoint(), pick=R(), u=R();
+      const s2 = pick<.09 ? u*.30 : pick<.20 ? .30+u*.14 : pick<.57 ? .44+u*.18 : .62+u*.38;
+      XS.push({x:q[0],y:q[1],a:Math.pow(R(),3),ph:R()*6.283,d:R(),col:ramp(s2),vr:R()<.06});
+    }
   }
 
-  function resize(){
-    const dpr = Math.min(devicePixelRatio||1, 2);
-    W = c.clientWidth; H = c.clientHeight;
-    c.width = W*dpr; c.height = H*dpr;
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    seed();
-  }
-
-  function seed(){
-    // Background & foreground stars
-    const nStars = Math.min(480, Math.floor((W*H)/3200));
-    stars = Array.from({length:nStars}, () => {
-      const z = 0.15 + Math.pow(Math.random(), 1.8) * 0.85; // depth
-      const col = STAR_PALETTE[Math.floor(Math.random()*STAR_PALETTE.length)];
-      const bright = z > 0.86 && Math.random() < 0.28;
-      return {
-        x: Math.random()*W,
-        y: Math.random()*H,
-        z,
-        r: bright ? (1.8 + Math.random()*1.5) : (0.45 + z*1.35),
-        bright,
-        h: col.h, s: col.s, l: col.l,
-        ph: Math.random()*Math.PI*2,
-        sp: 0.6 + Math.random()*1.8
-      };
+  const specBtns=[...document.querySelectorAll('.spec')];
+  function layout(){
+    const dpr=Math.min(devicePixelRatio||1,2);
+    W=innerWidth;H=innerHeight;
+    cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+    const wasMobile=mobile; mobile=W<=1040;
+    if(!P.length||wasMobile!==mobile) makeStars();
+    buildSpectrum();
+    if(mobile){ side=Math.min(W*.96,H*.7); px=(W-side)/2; py=(H-side)/2; }
+    else{
+      const colR=document.querySelector('header .col').getBoundingClientRect().right;
+      const left=Math.max(colR+30,W*.55), right=W-28;
+      side=Math.min(right-left,H*.76);
+      px=left+(right-left-side)/2; py=(H-side)/2-10;
+      capEl.style.left=left+'px'; capEl.style.width=(right-left)+'px';
+      specBtns.forEach((b,i)=>{b.style.left=(px+SPEC[i].x*side)+'px';b.style.top=(py+SPEC[i].y*side)+'px'});
+    }
+    const docH=document.documentElement.scrollHeight;
+    anchors=ORDER.map(([id,k])=>{
+      const el=document.getElementById(id);
+      // the first plate holds for the whole pinned hero, then lets go
+      if(id==='top'){ hdrH=el.offsetHeight; return {c:Math.max(H/2,hdrH-H/2),k,id}; }
+      return {c:clamp(topOf(el)+el.offsetHeight/2,H/2,docH-H/2),k,id};
     });
-
-    // Ambient cosmic dust / nebula clouds
-    nebulae = [
-      {xr:0.74, yr:0.38, r:Math.max(W,H)*0.34, col:'123, 91, 214', a:0.11},
-      {xr:0.28, yr:0.25, r:Math.max(W,H)*0.28, col:'46, 158, 120', a:0.07},
-      {xr:0.62, yr:0.72, r:Math.max(W,H)*0.30, col:'216, 85, 74',  a:0.07}
-    ];
-
-    // 3 Galaxies across the field: Grand-design spiral, distant tilted spiral, golden elliptical/lenticular
-    const scale = Math.min(W, H);
-    galaxies = [
-      makeGalaxy({
-        xr: W > 760 ? 0.73 : 0.65,
-        yr: W > 760 ? 0.43 : 0.32,
-        radius: scale * (W > 760 ? 0.29 : 0.24),
-        count: W > 760 ? 680 : 420,
-        arms: 2,
-        twist: 4.5,
-        tilt: 0.46,
-        angle: -0.42,
-        rotSpeed: 0.038,
-        coreHue: 38,
-        armHue: 225,
-        depth: 0.55
-      }),
-      makeGalaxy({
-        xr: W > 760 ? 0.22 : 0.18,
-        yr: 0.19,
-        radius: scale * 0.13,
-        count: 260,
-        arms: 2,
-        twist: 3.8,
-        tilt: 0.34,
-        angle: 0.65,
-        rotSpeed: -0.05,
-        coreHue: 28,
-        armHue: 185,
-        depth: 0.32
-      }),
-      makeGalaxy({
-        xr: 0.86,
-        yr: 0.80,
-        radius: scale * 0.10,
-        count: 190,
-        arms: 3,
-        twist: 3.2,
-        tilt: 0.58,
-        angle: 1.1,
-        rotSpeed: 0.045,
-        coreHue: 45,
-        armHue: 265,
-        depth: 0.25
-      })
-    ];
+    fEnd=Math.max(1,anchors[1].c-H/2);   // the filters run from the top of the page to the middle of About
+    placeAxis(docH);
   }
 
-  function spawnMeteor(){
-    if(meteors.length > 1 || Math.random() > 0.008) return;
-    const startX = Math.random()*W*0.9 + W*0.05;
-    const startY = Math.random()*H*0.4;
-    const angle = Math.PI*0.72 + (Math.random()-0.5)*0.25;
-    const speed = 11 + Math.random()*7;
-    meteors.push({
-      x: startX, y: startY,
-      vx: Math.cos(angle)*speed,
-      vy: Math.sin(angle)*speed,
-      len: 75 + Math.random()*65,
-      life: 0, maxLife: 38 + Math.random()*22,
-      hue: Math.random() < 0.5 ? 195 : 260
+  /* left ruler */
+  const axis=document.getElementById('axis'), mark=document.getElementById('mark');
+  const ticks=[...axis.querySelectorAll('a[data-s]')];
+  function placeAxis(docH){
+    const span=Math.max(1,docH-H);
+    ticks.forEach(a=>{
+      const el=document.getElementById(a.dataset.s);
+      a._f=clamp(topOf(el)/span,0,1);
+      a.style.top=`calc(13vh + ${a._f} * 74vh)`;
     });
   }
-
-  function draw(now){
-    const t = now * 0.001;
-    mx += (tmx - mx) * 0.05;
-    my += (tmy - my) * 0.05;
-
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = '#020306';
-    ctx.fillRect(0,0,W,H);
-
-    // Additive blending for realistic astronomical light accumulation
-    ctx.globalCompositeOperation = 'screen';
-
-    // 1. Soft nebula glow
-    for(const nb of nebulae){
-      const nx = nb.xr*W - mx*14;
-      const ny = nb.yr*H - my*14;
-      const g = ctx.createRadialGradient(nx, ny, 0, nx, ny, nb.r);
-      g.addColorStop(0, `rgba(${nb.col}, ${nb.a})`);
-      g.addColorStop(0.55, `rgba(${nb.col}, ${nb.a*0.35})`);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(nx, ny, nb.r, 0, Math.PI*2); ctx.fill();
-    }
-
-    // 2. Galaxies (rotated + tilted in 3D projection)
-    for(const gal of galaxies){
-      const gx = gal.xr*W - mx * 26 * gal.depth;
-      const gy = gal.yr*H - my * 26 * gal.depth;
-      const cosA = Math.cos(gal.angle), sinA = Math.sin(gal.angle);
-      const rot = reduce ? 0 : t * gal.rotSpeed;
-
-      // Galactic core glow
-      const coreR = gal.radius * 0.42;
-      const cg = ctx.createRadialGradient(gx, gy, 0, gx, gy, coreR);
-      cg.addColorStop(0, 'rgba(255, 232, 185, 0.42)');
-      cg.addColorStop(0.28, 'rgba(235, 165, 105, 0.16)');
-      cg.addColorStop(0.65, 'rgba(135, 105, 225, 0.05)');
-      cg.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = cg;
-      ctx.beginPath(); ctx.arc(gx, gy, coreR, 0, Math.PI*2); ctx.fill();
-
-      // Spiral arm stars & HII regions
-      for(const p of gal.pts){
-        // Differential rotation: inner regions rotate slightly faster visually
-        const a = p.theta + rot * (1.15 - 0.35*(p.r/gal.radius));
-        const lx = Math.cos(a) * p.r;
-        const ly = Math.sin(a) * p.r * gal.tilt;
-        const x = gx + lx*cosA - ly*sinA;
-        const y = gy + lx*sinA + ly*cosA;
-
-        if(p.isHII){
-          ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, ${p.alpha*0.25})`;
-          ctx.beginPath(); ctx.arc(x, y, p.size*3.2, 0, Math.PI*2); ctx.fill();
-        }
-        ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, ${p.alpha})`;
-        ctx.beginPath(); ctx.arc(x, y, p.size, 0, Math.PI*2); ctx.fill();
-      }
-    }
-
-    // 3. Field stars with parallax & diffraction spikes
-    for(const s of stars){
-      if(!reduce){
-        s.x -= 0.03 * s.z;
-        if(s.x < -10) s.x = W + 10;
-      }
-      const px = s.x - mx * 34 * s.z;
-      const py = s.y - my * 34 * s.z;
-      const tw = reduce ? 0.8 : (0.55 + 0.42*Math.sin(t*s.sp + s.ph));
-
-      // Halo
-      ctx.fillStyle = `hsla(${s.h}, ${s.s}%, ${s.l}%, ${tw*0.22})`;
-      ctx.beginPath(); ctx.arc(px, py, s.r*3.2, 0, Math.PI*2); ctx.fill();
-
-      // Core
-      ctx.fillStyle = `hsla(${s.h}, ${s.s}%, ${Math.min(98, s.l+12)}%, ${tw})`;
-      ctx.beginPath(); ctx.arc(px, py, s.r, 0, Math.PI*2); ctx.fill();
-
-      // JWST/HST diffraction spikes on bright foreground stars
-      if(s.bright){
-        const spike = s.r * (5.2 + 1.6*tw);
-        ctx.strokeStyle = `hsla(${s.h}, ${s.s}%, 90%, ${tw*0.48})`;
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(px - spike, py); ctx.lineTo(px + spike, py);
-        ctx.moveTo(px, py - spike); ctx.lineTo(px, py + spike);
-        ctx.stroke();
-      }
-    }
-
-    // 4. Shooting stars / meteors
-    if(!reduce){
-      spawnMeteor();
-      for(let i=meteors.length-1; i>=0; i--){
-        const m = meteors[i];
-        m.x += m.vx; m.y += m.vy; m.life++;
-        const p = m.life / m.maxLife;
-        const alpha = Math.sin(p * Math.PI);
-        const tailX = m.x - (m.vx / 14) * m.len;
-        const tailY = m.y - (m.vy / 14) * m.len;
-        const grad = ctx.createLinearGradient(m.x, m.y, tailX, tailY);
-        grad.addColorStop(0, `hsla(${m.hue}, 90%, 92%, ${alpha})`);
-        grad.addColorStop(1, `hsla(${m.hue}, 90%, 70%, 0)`);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.6;
-        ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(tailX, tailY); ctx.stroke();
-        if(m.life >= m.maxLife) meteors.splice(i, 1);
-      }
-    }
-
-    if(!reduce) raf = requestAnimationFrame(draw);
+  function moveAxis(){
+    const span=Math.max(1,document.documentElement.scrollHeight-H), f=clamp(scrollY/span,0,1);
+    mark.style.top=`calc(13vh + ${f} * 74vh)`;
+    axis.classList.toggle('scrolled',scrollY>H*.45);
+    let on=null; for(const a of ticks) if(f>=a._f-.012) on=a;
+    ticks.forEach(a=>a.classList.toggle('on',a===on));
   }
 
-  resize();
-  addEventListener('resize', ()=>{cancelAnimationFrame(raf);resize();raf=requestAnimationFrame(draw)});
-  raf = requestAnimationFrame(draw);
-})();
+  function state(y){
+    let j=0; while(j<anchors.length-2 && y>anchors[j+1].c) j++;
+    const A=anchors[j],B=anchors[j+1];
+    const t=clamp((y-A.c)/Math.max(1,B.c-A.c),0,1);
+    return {from:A.k,to:B.k,e:clamp((t-.06)/.88,0,1)};
+  }
 
-
-/* ============================================================
-   2. THE MODEL, LIVE: 5 → 4 → 3 → 2 → 3 → 4 → 5 (Dark Mode)
-   Pulses flow through the gated state autoencoder with luminous
-   passband nodes and glowing state-coupling arcs.
-   ============================================================ */
-(function(){
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const cv = document.getElementById('gsa');
-  const card = document.getElementById('pubcard');
-  if(!cv || !card) return;
-  const ctx = cv.getContext('2d');
-
-  const LAYERS = [5,4,3,2,3,4,5];
-  const BANDS  = ['#9D7BFF','#36D69E','#FF9E44','#FF6257','#D4629A']; // luminous u g r i z
-  const INNER  = '#7E89A8';
-  const BOTTLE = '#FFFFFF';
-  let W=300, H=250, nodes=[], raf=null, running=false;
-  let gAmt=0, hovering=false;
-  const gw = [1.6, 2.6, 1.2, 3.2, 2.0];
-  const gp = [0, 2.1, 4.0, 1.2, 3.3];
-
-  const ARCS = [
-    {a:1, b:5, col:'157,123,255', lift:46},
-    {a:2, b:4, col:'54,214,158',  lift:25}
-  ];
-
-  function build(){
-    const dpr = Math.min(devicePixelRatio||1,2);
-    W = cv.clientWidth || 300; H = W * (250/300);
-    cv.width = W*dpr; cv.height = H*dpr;
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    const padX = 30, spacing = Math.min(34, (H-76)/4);
-    nodes = LAYERS.map((n,L)=>{
-      const x = padX + L*(W-2*padX)/(LAYERS.length-1);
-      return Array.from({length:n},(_,j)=>({
-        x, y: H/2 + 14 + (j-(n-1)/2)*spacing
-      }));
+  /* ---------- the long spectrum: wavelength runs down the page ----------
+     Three stars' light is drawn top to bottom, 400 to 1040 nm. A scan line sits at the
+     middle of the window; whichever filter it is inside is the one the field is seen through. */
+  const specEl=document.getElementById('spectrum'), L0=400, L1=1040, SVGN='http://www.w3.org/2000/svg';
+  let spH=0, spTop=0, spX=v=>v, spClip, spScan, spLab, spDots=[], spLines=[], spMax=[], spStage=6;
+  const sv=(par,n,at,txt)=>{const e=document.createElementNS(SVGN,n);for(const k in at)e.setAttribute(k,at[k]);if(txt!=null)e.textContent=txt;par.appendChild(e);return e};
+  function buildSpectrum(){
+    const w=specEl.clientWidth; spH=Math.round(H*(mobile?1.05:1.15));
+    specEl.innerHTML='';
+    const svg=sv(specEl,'svg',{width:w,height:spH,viewBox:`0 0 ${w} ${spH}`,role:'img','aria-label':'The light of a hot, a Sun-like and a cool star from 400 to 1040 nanometres, crossing the five filters g, r, i, z and y'});
+    const yOf=l=>(l-L0)/(L1-L0)*spH, xL=mobile?44:62, xR=w-6;
+    spX=v=>xL+(xR-xL)*(.05+.9*v);
+    const mono='JetBrains Mono,monospace', serif='Instrument Serif,Georgia,serif';
+    spClip=sv(sv(sv(svg,'defs',{}),'clipPath',{id:'spClip'}),'rect',{x:-20,y:-20,width:w+40,height:20});
+    sv(svg,'rect',{x:xL-12,y:0,width:xR-xL+12,height:spH,fill:'#030304','fill-opacity':.86});   // keep the field from showing through
+    // the five filters, stacked down the page
+    BAND.forEach((b,i)=>{
+      const y0=yOf(b[0]), y1=yOf(b[1]), c=`rgb(${TINT[i]})`;
+      sv(svg,'rect',{x:xL,y:y0+1,width:xR-xL,height:y1-y0-2,fill:c,'fill-opacity':.05});
+      sv(svg,'line',{x1:xL,y1:y0,x2:xR,y2:y0,stroke:c,'stroke-opacity':.5});
+      sv(svg,'text',{x:xR-10,y:y1-14,'text-anchor':'end',fill:c,'fill-opacity':.3,'font-size':Math.min(mobile?90:120,(y1-y0)*.62),'font-style':'italic','font-family':serif},FN[i]);
+      sv(svg,'text',{x:xR-10,y:y0+20,'text-anchor':'end',fill:c,'font-size':10,'letter-spacing':'.14em','font-family':mono},`FILTER ${FN[i]} · ${b[0]}–${b[1]} NM`);
     });
-  }
-
-  const T = 3.4;
-  const SD = 0.135;
-  const easeIO = x => x<.5 ? 2*x*x : 1-Math.pow(-2*x+2,2)/2;
-
-  function gate(i,t){
-    const osc = 0.06 + 0.94*(0.5 + 0.5*Math.sin(t*gw[i] + gp[i]));
-    return 1 + (osc-1)*gAmt;
-  }
-
-  function nodeStyle(L,j){
-    if(L===0||L===6) return {color:BANDS[j], r: Math.min(W,H)*0.020+2.6};
-    if(L===3)        return {color:BOTTLE,  r: Math.min(W,H)*0.018+2.6};
-    return {color:INNER, r: Math.min(W,H)*0.013+2.2};
-  }
-
-  function qpoint(p0,c,p1,q){
-    const u = 1-q;
-    return {
-      x: u*u*p0.x + 2*u*q*c.x + q*q*p1.x,
-      y: u*u*p0.y + 2*u*q*c.y + q*q*p1.y
-    };
-  }
-
-  function draw(now){
-    const t = now/1000;
-    gAmt += ((hovering?1:0) - gAmt)*0.12;
-    const tw = (t % T)/T;
-    ctx.clearRect(0,0,W,H);
-
-    // --- edges (luminous scaffold) ---
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    for(let L=0; L<6; L++){
-      for(const a of nodes[L]) for(const b of nodes[L+1]){
-        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
-      }
+    sv(svg,'line',{x1:xL,y1:spH,x2:xR,y2:spH,stroke:'#3A3832'});
+    // wavelength axis
+    sv(svg,'line',{x1:xL-12,y1:0,x2:xL-12,y2:spH,stroke:'#3A3832'});
+    for(let l=400;l<=1000;l+=50){ const y=yOf(l);
+      sv(svg,'line',{x1:xL-12,y1:y,x2:xL-(l%100?8:5),y2:y,stroke:'#6F6C65'});
+      if(l%100===0) sv(svg,'text',{x:xL-18,y:y+3,'text-anchor':'end',fill:'#6F6C65','font-size':9.5,'font-family':mono},l);
     }
-
-    // --- state-coupling arcs over the bottleneck ---
-    for(const arc of ARCS){
-      const p0 = {x:nodes[arc.a][0].x, y:nodes[arc.a][0].y - 11};
-      const p1 = {x:nodes[arc.b][0].x, y:nodes[arc.b][0].y - 11};
-      const c  = {x:(p0.x+p1.x)/2, y:Math.min(p0.y,p1.y) - arc.lift};
-      ctx.strokeStyle = `rgba(${arc.col},0.65)`;
-      ctx.lineWidth = 1.4;
-      ctx.setLineDash([4,5]);
-      ctx.lineDashOffset = reduce ? 0 : -t*14;
-      ctx.beginPath(); ctx.moveTo(p0.x,p0.y);
-      ctx.quadraticCurveTo(c.x,c.y,p1.x,p1.y); ctx.stroke();
-      ctx.setLineDash([]);
-
-      const apex = qpoint(p0,c,p1,0.5);
-      ctx.font = '9px "Spline Sans Mono", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = `rgba(${arc.col},0.95)`;
-      ctx.fillText('h, c', apex.x, apex.y - 5);
-
-      if(!reduce){
-        const dep = arc.a*SD, arr = arc.b*SD;
-        if(tw > dep && tw < arr){
-          const q = easeIO((tw-dep)/(arr-dep));
-          const pt = qpoint(p0,c,p1,q);
-          ctx.fillStyle = `rgba(${arc.col},1)`;
-          ctx.beginPath(); ctx.arc(pt.x,pt.y,2.6,0,7); ctx.fill();
-        }
-      }
-    }
-
-    // --- traveling pulses ---
-    if(!reduce){
-      for(let s=0; s<6; s++){
-        const st0 = s*SD;
-        if(tw < st0 || tw > st0+SD) continue;
-        const p = easeIO((tw-st0)/SD);
-        for(let ai=0; ai<nodes[s].length; ai++){
-          const a = nodes[s][ai];
-          for(let bi=0; bi<nodes[s+1].length; bi++){
-            const b = nodes[s+1][bi];
-            const x = a.x + (b.x-a.x)*p, y = a.y + (b.y-a.y)*p;
-            let col, alpha = .75*Math.sin(p*Math.PI);
-            if(s===0){ col = BANDS[ai]; alpha *= gate(ai,t); }
-            else if(s===5){ col = BANDS[bi]; alpha *= gate(bi,t); }
-            else { col = '#B9C4E2'; alpha *= .75; }
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = col;
-            ctx.beginPath(); ctx.arc(x,y,1.9,0,7); ctx.fill();
-          }
-        }
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function act(L){
-      if(reduce) return 0;
-      const arrive = L*SD;
-      let d = tw - arrive; if(d<0) d += 1;
-      return Math.max(0, 1 - d/0.14);
-    }
-
-    // --- nodes ---
-    for(let L=0; L<7; L++){
-      const aL = act(L);
-      for(let j=0; j<nodes[L].length; j++){
-        const n = nodes[L][j], st = nodeStyle(L,j);
-        let g = 1, baseA = (L===0||L===6) ? 1 : (L===3 ? 1 : .65);
-        if(L===0) g = gate(j,t);
-        if(L===6) g = 0.3 + 0.7*gate(j,t);
-        const r = st.r * (0.7 + 0.3*g) * (1 + aL*0.24);
-        const alpha = baseA * (0.2 + 0.8*g);
-
-        ctx.globalAlpha = alpha * (0.22 + aL*0.35);
-        ctx.fillStyle = st.color;
-        ctx.beginPath(); ctx.arc(n.x,n.y,r*2.8,0,7); ctx.fill();
-
-        ctx.globalAlpha = alpha;
-        ctx.beginPath(); ctx.arc(n.x,n.y,r,0,7); ctx.fill();
-
-        if(L===3){
-          ctx.globalAlpha = .65 + aL*.35;
-          ctx.strokeStyle = BOTTLE; ctx.lineWidth = 1.3;
-          ctx.beginPath(); ctx.arc(n.x,n.y,r+3.6,0,7); ctx.stroke();
-        }
-      }
-    }
-    ctx.globalAlpha = 1;
-
-    if(running && !reduce) raf = requestAnimationFrame(draw);
-  }
-
-  function startStop(on){
-    if(on && !running){ running = true; raf = requestAnimationFrame(draw); }
-    else if(!on && running){ running = false; cancelAnimationFrame(raf); }
-  }
-
-  build();
-  if(reduce){ draw(0); }
-  else{
-    new IntersectionObserver(es=>startStop(es[0].isIntersecting),{threshold:.15}).observe(cv);
-  }
-
-  card.addEventListener('pointerenter', e=>{ if(e.pointerType!=='touch') hovering=true; });
-  card.addEventListener('pointerleave', ()=>hovering=false);
-  card.addEventListener('mouseenter', ()=>hovering=true);
-  card.addEventListener('mouseleave', ()=>hovering=false);
-  card.addEventListener('focusin',  ()=>hovering=true);
-  card.addEventListener('focusout', ()=>hovering=false);
-  cv.addEventListener('pointerdown', e=>{ if(e.pointerType==='touch') hovering=!hovering; });
-
-  addEventListener('resize', ()=>{ build(); if(reduce) draw(0); });
-})();
-
-
-/* ============================================================
-   3. FOOTER GLOBULAR CLUSTER (Omega Centauri / M13 Simulation)
-   - 1,450 stars distributed on a 3D King profile (dense core, extended halo)
-   - Realistic stellar populations: Red Giants, Blue Stragglers, Main Sequence
-   - Unresolved luminous core glow + additive screen blending
-   - Interactive gravitational perturbation on pointer move
-   ============================================================ */
-(function(){
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const c = document.getElementById('cluster');
-  if(!c) return;
-  const ctx = c.getContext('2d');
-  const footer = c.closest('footer');
-  let W, H, pts=[], raf, t0=null, started=false, assembled=false;
-  let cx, cy, R;
-  let mouse = {x:-9999, y:-9999, active:false};
-
-  footer.addEventListener('pointermove', e => {
-    const rect = c.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
-    mouse.active = true;
-  }, {passive:true});
-  footer.addEventListener('pointerleave', () => { mouse.active = false; });
-
-  const ease = x => 1 - Math.pow(1-x, 3);
-
-  function build(){
-    const dpr = Math.min(devicePixelRatio||1, 2);
-    W = footer.clientWidth; H = footer.clientHeight;
-    c.width = W*dpr; c.height = H*dpr;
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-
-    cx = W > 900 ? W*0.76 : W*0.5;
-    cy = W > 900 ? H*0.48 : H*0.32;
-    R  = Math.min(W,H) * (W > 900 ? 0.42 : 0.34);
-
-    const n = W > 760 ? 1450 : 850;
-    pts = Array.from({length:n}, () => {
-      // 3D King-like radial concentration: extreme core density
-      const u = Math.random();
-      const r3d = R * Math.pow(u, 2.75);
-      // Spherical angles
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-
-      // Stellar population color assignment
-      const pop = Math.random();
-      let hue, sat, light, sizeBoost = 1;
-      if(pop < 0.14){
-        // Bright Red Giants (cool, luminous orange-red)
-        hue = 18 + Math.random()*24; sat = 90; light = 72; sizeBoost = 1.55;
-      } else if(pop < 0.25 && r3d < R*0.45){
-        // Blue Stragglers (concentrated toward core via dynamical mass segregation)
-        hue = 205 + Math.random()*35; sat = 95; light = 82; sizeBoost = 1.35;
-      } else if(pop < 0.36){
-        // Horizontal Branch / u-band violet-blue
-        hue = 250 + Math.random()*25; sat = 82; light = 78; sizeBoost = 1.05;
-      } else {
-        // Old Main Sequence / Subgiants (warm white to golden yellow)
-        hue = 38 + Math.random()*22; sat = 68; light = 84; sizeBoost = 0.9;
-      }
-
-      const coreProx = Math.max(0, 1 - r3d / (R*0.5));
-      return {
-        sx: Math.random()*W, sy: Math.random()*H,
-        r3d, theta, phi,
-        // Keplerian-like angular speed: stars closer to core orbit faster
-        om: (0.04 + 0.18 / (0.25 + r3d/R)) * (Math.random()<.5 ? 1 : -1),
-        size: (0.45 + Math.random()*1.15) * sizeBoost + coreProx*0.65,
-        hue, sat, light,
-        delay: Math.random()*0.85,
-        ph: Math.random()*Math.PI*2
-      };
+    sv(svg,'text',{x:xL-18,y:-14,'text-anchor':'end',fill:'#6F6C65','font-size':9.5,'font-family':mono},'nm');
+    // three stars: a faint full curve, and a bright one revealed down to the scan line
+    const drawn=sv(svg,'g',{'clip-path':'url(#spClip)'});
+    spLines=[]; spMax=[]; spDots=[];
+    SPEC.forEach((sp,k)=>{
+      const T=tempOf(sp.s), pts=[]; let m=0;
+      for(let l=L0;l<=L1;l+=4){const v=planck(l,T);pts.push([l,v]);if(v>m)m=v;}
+      spMax.push(m);
+      const d=pts.map((q,i)=>(i?'L':'M')+spX(q[1]/m).toFixed(1)+' '+yOf(q[0]).toFixed(1)).join(''), c=`rgb(${ramp(sp.s)})`;
+      sv(svg,'path',{d,fill:'none',stroke:c,'stroke-opacity':.16,'stroke-width':1.2});
+      spLines.push(sv(drawn,'path',{d,fill:'none',stroke:c,'stroke-width':2,'stroke-linecap':'round'}));
+      LAM.forEach((l,i)=>sv(drawn,'circle',{cx:spX(planck(l,T)/m),cy:yOf(l),r:3.4,fill:`rgb(${TINT[i]})`,stroke:'#030304','stroke-width':1.2}));
+      sv(svg,'path',{d,fill:'none',stroke:'transparent','stroke-width':22,class:'hit'}).addEventListener('click',()=>selectStar(k));
+      const x0=spX(pts[0][1]/m);
+      sv(svg,'text',{x:clamp(x0,xL+26,xR-30),y:-14,'text-anchor':'middle',fill:c,'font-size':10,'letter-spacing':'.14em','font-family':mono},sp.name.replace(' star','').toUpperCase());
     });
+    // scan line
+    spScan=sv(svg,'g',{});
+    sv(spScan,'line',{x1:xL-12,y1:0,x2:xR,y2:0,stroke:'#FDF8E9','stroke-opacity':.55,'stroke-dasharray':'2 5'});
+    spLab=sv(spScan,'text',{x:xL+8,y:-8,fill:'#FDF8E9','font-size':10.5,'letter-spacing':'.1em','font-family':mono},'');
+    SPEC.forEach(sp=>spDots.push(sv(spScan,'circle',{cy:0,r:5.5,fill:`rgb(${ramp(sp.s)})`,stroke:'#030304','stroke-width':1.5})));
+    spTop=topOf(svg);
+    markCurves();
+  }
+  function markCurves(){ spLines.forEach((l,k)=>{l.setAttribute('stroke-width',k===sel?3.2:1.6);l.setAttribute('stroke-opacity',k===sel?1:.6)}); }
+  function updateSpectrum(){
+    const raw=scrollY+H*.5-spTop, sy=clamp(raw,0,spH), lam=L0+sy/spH*(L1-L0);
+    spStage = raw<0 ? 6 : raw>=spH ? 5 : Math.max(0,BAND.findIndex(b=>lam<b[1]));
+    if(sy===spScan._y) return; spScan._y=sy;
+    spClip.setAttribute('height',sy+20);
+    spScan.setAttribute('transform',`translate(0 ${sy.toFixed(1)})`);
+    spScan.setAttribute('opacity',raw<0||raw>=spH?0:1);
+    spLab.textContent=Math.round(lam)+' NM';
+    SPEC.forEach((sp,k)=>spDots[k].setAttribute('cx',spX(planck(lam,tempOf(sp.s))/spMax[k])));
   }
 
-  function draw(now){
-    if(t0===null) t0 = now;
-    const elapsed = (now - t0)/1000;
-
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.clearRect(0,0,W,H);
-    ctx.globalCompositeOperation = 'screen';
-
-    // Unresolved stellar core glow (builds as stars assemble)
-    const assembleProg = reduce ? 1 : Math.min(1, elapsed / 2.2);
-    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R*0.65);
-    coreGrad.addColorStop(0, `rgba(255, 244, 214, ${0.42 * assembleProg})`);
-    coreGrad.addColorStop(0.18, `rgba(255, 198, 135, ${0.22 * assembleProg})`);
-    coreGrad.addColorStop(0.45, `rgba(145, 115, 240, ${0.09 * assembleProg})`);
-    coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = coreGrad;
-    ctx.beginPath(); ctx.arc(cx, cy, R*0.65, 0, Math.PI*2); ctx.fill();
-
-    for(const p of pts){
-      // 3D orbital position projected to 2D
-      const angle = p.theta + (reduce ? 0 : elapsed * p.om);
-      const sinPhi = Math.sin(p.phi);
-      const tx = cx + p.r3d * sinPhi * Math.cos(angle);
-      const ty = cy + p.r3d * Math.cos(p.phi) * 0.92;
-      const tz = p.r3d * sinPhi * Math.sin(angle); // depth for subtle scaling
-
-      let x, y;
-      const k = Math.min(Math.max((elapsed - p.delay)/2.3, 0), 1);
-      if(k < 1 && !reduce){
-        const e = ease(k);
-        const bend = Math.sin(e*Math.PI) * 32 * Math.sin(p.ph);
-        x = p.sx + (tx - p.sx)*e + bend*0.4;
-        y = p.sy + (ty - p.sy)*e + bend;
-      } else {
-        assembled = true;
-        x = tx; y = ty;
-      }
-
-      // Subtle interactive gravitational lensing around cursor
-      if(mouse.active && !reduce){
-        const dx = x - mouse.x, dy = y - mouse.y;
-        const d2 = dx*dx + dy*dy;
-        if(d2 < 16000 && d2 > 4){
-          const pull = (1 - d2/16000) * 14;
-          const dist = Math.sqrt(d2);
-          x += ( -dy / dist ) * pull; // tangential swirl
-          y += (  dx / dist ) * pull;
-        }
-      }
-
-      const depthScale = 0.82 + 0.36 * ((tz / R + 1) * 0.5);
-      const tw = reduce ? 0.85 : (0.62 + 0.36*Math.sin(elapsed*1.8 + p.ph));
-      const sz = p.size * depthScale;
-
-      if(sz > 1.35){
-        ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, ${tw*0.22})`;
-        ctx.beginPath(); ctx.arc(x, y, sz*3.0, 0, Math.PI*2); ctx.fill();
-      }
-      ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, ${tw})`;
-      ctx.beginPath(); ctx.arc(x, y, sz, 0, Math.PI*2); ctx.fill();
-    }
-
-    raf = requestAnimationFrame(draw);
+  /* ---------- filters ---------- */
+  const fBtns=[...document.querySelectorAll('#filters button')];
+  // states: 0-4 = g r i z y, 5 = all five in color, 6 = white light (no filter)
+  const SEQ=[6,0,1,2,3,4,5];
+  const wv=[0,0,0,0,0,0,1]; let pinned=-1, fCur=6, fShown=-1;
+  fBtns.forEach(b=>b.addEventListener('click',()=>{ const i=+b.dataset.f; pinned = pinned===i ? -1 : i; }));
+  function showFilter(i){
+    fShown=i; fBtns.forEach(b=>{const on=+b.dataset.f===i;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+    document.querySelectorAll('#sed .band').forEach((r,j)=>r.setAttribute('fill-opacity',j===i?.2:.055));
   }
 
-  function start(){
-    if(started) return;
-    started = true;
-    build();
-    if(reduce){
-      t0 = -1e6; draw(0); cancelAnimationFrame(raf);
-      return;
-    }
-    raf = requestAnimationFrame(draw);
-  }
-
-  new IntersectionObserver((entries,obs)=>{
-    if(entries[0].isIntersecting){ start(); obs.disconnect(); }
-  },{threshold:.2}).observe(footer);
-
-  addEventListener('resize',()=>{
-    if(!started) return;
-    cancelAnimationFrame(raf);
-    const wasAssembled = assembled;
-    build();
-    if(wasAssembled) t0 = -1e6;
-    else t0 = null;
-    if(reduce){ draw(0); cancelAnimationFrame(raf); }
-    else raf = requestAnimationFrame(draw);
+  /* ---------- the three stars and their light ---------- */
+  const NS='http://www.w3.org/2000/svg', sed=document.getElementById('sed');
+  const X=l=>12+296*(l-390)/(1050-390), Y=v=>116-90*v;
+  const mk=(n,at)=>{const e=document.createElementNS(NS,n);for(const k in at)e.setAttribute(k,at[k]);sed.appendChild(e);return e};
+  BAND.forEach((b,i)=>{
+    mk('rect',{class:'band',x:X(b[0]),y:22,width:X(b[1])-X(b[0])-1.5,height:94,fill:`rgb(${TINT[i]})`,'fill-opacity':.055});
+    mk('text',{x:(X(b[0])+X(b[1]))/2,y:15,'text-anchor':'middle',fill:`rgb(${TINT[i]})`,'font-size':12,'font-style':'italic','font-family':'Instrument Serif,Georgia,serif'}).textContent=FN[i];
   });
+  mk('line',{x1:12,y1:116,x2:308,y2:116,stroke:'#3A3832'});
+  mk('text',{x:12,y:132,fill:'#6F6C65','font-size':9,'font-family':'JetBrains Mono,monospace'}).textContent='400 nm';
+  mk('text',{x:308,y:132,'text-anchor':'end',fill:'#6F6C65','font-size':9,'font-family':'JetBrains Mono,monospace'}).textContent='1000 nm';
+  mk('text',{x:160,y:132,'text-anchor':'middle',fill:'#6F6C65','font-size':9,'font-family':'JetBrains Mono,monospace'}).textContent='wavelength →';
+  const curve=mk('path',{fill:'none','stroke-width':2,'stroke-linecap':'round'});
+  const dots=LAM.map((l,i)=>mk('circle',{r:3.6,fill:`rgb(${TINT[i]})`,stroke:'#030304','stroke-width':1.2}));
+  function drawSED(s){
+    const T=tempOf(s), pts=[]; let m=0;
+    for(let l=390;l<=1050;l+=10){const v=planck(l,T);pts.push([l,v]);if(v>m)m=v;}
+    curve.setAttribute('d',pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]/m).toFixed(1)).join(''));
+    curve.setAttribute('stroke',`rgb(${ramp(s)})`);
+    LAM.forEach((l,i)=>{dots[i].setAttribute('cx',X(l));dots[i].setAttribute('cy',Y(planck(l,T)/m))});
+  }
+  const sBtns=[...document.querySelectorAll('#stars button')], sedName=document.getElementById('sedName');
+  let sel=0, sNow=SPEC[0].s, sTween=null;
+  function selectStar(i){
+    sel=i;
+    sBtns.forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-pressed',j===i)});
+    specBtns.forEach((b,j)=>b.classList.toggle('on',j===i));
+    markCurves();
+    const T=Math.round(tempOf(SPEC[i].s)/100)*100;
+    sedName.textContent=SPEC[i].name+' · about '+T.toLocaleString('en-US')+' K';
+    const s0=sNow, s1=SPEC[i].s, t0=performance.now();
+    cancelAnimationFrame(sTween);
+    if(REDUCE){ sNow=s1; drawSED(s1); return; }
+    (function step(now){ const k=clamp((now-t0)/650,0,1); sNow=s0+(s1-s0)*smooth(k); drawSED(sNow); if(k<1) sTween=requestAnimationFrame(step); })(t0);
+  }
+  sBtns.forEach((b,i)=>b.addEventListener('click',()=>selectStar(i)));
+  specBtns.forEach((b,i)=>b.addEventListener('click',()=>selectStar(i)));
+  drawSED(sNow); selectStar(0);
+
+  let heroOn=null, scopeO=-1;
+  function frame(now){
+    const t=now/1000, target=scrollY+H/2;
+    yc = REDUCE ? target : yc+(target-yc)*.07;
+    mx+=(tmx-mx)*.05; my+=(tmy-my)*.05;
+    const st=state(yc), same=st.from===st.to;
+    const ox=px-mx*14, oy=py-my*14;
+    const wOf = i => (st.from===i?1-st.e:0)+(st.to===i?st.e:0);
+    const w0=smooth(clamp(wOf(0)*1.25-.25,0,1));
+
+    ctx.globalCompositeOperation='source-over';
+    ctx.clearRect(0,0,W,H);
+
+    // which plate are we on
+    const k = st.e>.5?st.to:st.from;
+    if(k!==curCap){ curCap=k; capEl.style.opacity=0;
+      setTimeout(()=>{capN.textContent=CAPS[k][0];capT.textContent=CAPS[k][1];capEl.style.opacity=1},REDUCE?0:260); }
+
+    // scrolling turns the filter wheel: white light, then g, r, i, z, y, then all five in color
+    const hp = clamp(scrollY/fEnd,0,1);
+    fCur = pinned>=0 ? pinned : spStage;
+    updateSpectrum();
+    if(fCur!==fShown) showFilter(fCur);
+    for(let b=0;b<7;b++) wv[b]+=((b===fCur?1:0)-wv[b])*(REDUCE?1:.07);
+    const famt=(1-wv[5])*w0;
+    let tr=255,tg=255,tb=255;
+    if(famt>.004){ let a0=wv[6]*255,a1=a0,a2=a0;
+      for(let b=0;b<5;b++){a0+=wv[b]*(127+.5*TINT[b][0]);a1+=wv[b]*(127+.5*TINT[b][1]);a2+=wv[b]*(127+.5*TINT[b][2]);}
+      const n=Math.max(.001,1-wv[5]); tr=a0/n; tg=a1/n; tb=a2/n; }
+
+    if(!mobile){
+      const on=w0>.5;
+      if(on!==heroOn){ heroOn=on; specBtns.forEach(b=>b.classList.toggle('live',on)); }
+      // name of the filter in view
+      if(w0>.02){
+        ctx.textAlign='left';
+        for(let b=0;b<7;b++){ if(wv[b]<.02) continue;
+          const c=b<5?TINT[b]:[253,248,233];
+          ctx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${wv[b]*w0})`;
+          ctx.font='italic 46px "Instrument Serif",Georgia,serif';
+          ctx.fillText(b<5?FN[b]:b===5?'all':'white',ox+side*.0,oy+side*.03+30);
+          ctx.font='10.5px "JetBrains Mono",monospace';
+          ctx.fillStyle=`rgba(171,167,157,${wv[b]*w0})`;
+          ctx.fillText(b<5?('FILTER · '+LAM[b]+' NM'):b===5?'FIVE FILTERS TOGETHER':'NO FILTER',ox+side*.0,oy+side*.03+50);
+        }
+      }
+    }
+
+    // unresolved light at the centre of the cluster and the galaxy
+    const gC=wOf(5), gG=wOf(3), glow=Math.max(gC,gG);
+    if(glow>.02){
+      const cx=ox+side/2, cy=oy+side/2;
+      ctx.globalCompositeOperation='lighter';
+      let g=ctx.createRadialGradient(cx,cy,0,cx,cy,side*.32);
+      g.addColorStop(0,`rgba(253,240,214,${.3*gC+.22*gG})`); g.addColorStop(.3,`rgba(240,200,150,${.11*gC+.07*gG})`); g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g; ctx.fillRect(ox,oy,side,side);
+      if(gC>.02){ g=ctx.createRadialGradient(cx,cy,0,cx,cy,side*.1);
+        g.addColorStop(0,`rgba(255,248,230,${.75*gC})`); g.addColorStop(.4,`rgba(253,236,205,${.3*gC})`); g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=g; ctx.fillRect(cx-side*.1,cy-side*.1,side*.2,side*.2); }
+      ctx.globalCompositeOperation='source-over';
+    }
+
+    // axes, drawn only for the arrangements that are plots
+    if(!mobile){
+      const w1=wOf(1), w2=wOf(2), w4=wOf(4), wax=Math.max(w1,w2);
+      if(wax>.02){
+        ctx.strokeStyle=`rgba(171,167,157,${.5*wax})`; ctx.lineWidth=1; ctx.beginPath();
+        const x0=ox+side*.04,y0=oy+side*.04,x1=ox+side*.96,y1=oy+side*.96;
+        ctx.moveTo(x0,y0);ctx.lineTo(x0,y1);ctx.lineTo(x1,y1);
+        for(let i=1;i<=8;i++){const u=i/8; ctx.moveTo(x0+(x1-x0)*u,y1);ctx.lineTo(x0+(x1-x0)*u,y1+5); ctx.moveTo(x0,y1-(y1-y0)*u);ctx.lineTo(x0-5,y1-(y1-y0)*u);}
+        ctx.stroke();
+        ctx.textAlign='center'; ctx.font='italic 19px "Instrument Serif",Georgia,serif';
+        const lab=(w,lx,ly)=>{ if(w<.02) return; ctx.fillStyle=`rgba(244,239,228,${.8*w})`;
+          ctx.fillText(lx,(x0+x1)/2,y1+28); ctx.save();ctx.translate(x0-18,(y0+y1)/2);ctx.rotate(-Math.PI/2);ctx.fillText(ly,0,0);ctx.restore(); };
+        lab(w1,'S','A'); lab(w2,'color','brightness');
+      }
+      if(w4>.02){
+        ctx.strokeStyle=`rgba(171,167,157,${.3*w4})`; ctx.lineWidth=1;
+        const cx=ox+side/2, cy=oy+side/2;
+        for(const r of [.155,.31,.465]){ctx.beginPath();ctx.arc(cx,cy,side*r,0,6.283);ctx.stroke();}
+        ctx.beginPath();ctx.moveTo(cx-side*.465,cy);ctx.lineTo(cx+side*.465,cy);ctx.moveTo(cx,cy-side*.465);ctx.lineTo(cx,cy+side*.465);ctx.stroke();
+        ctx.fillStyle=`rgba(171,167,157,${.75*w4})`; ctx.font='10px "JetBrains Mono",monospace'; ctx.textAlign='center';
+        ctx.fillText('180°',cx,cy-side*.465-8); ctx.fillText('0°',cx,cy+side*.465+16);
+        ctx.fillText('90°',cx-side*.465-16,cy+3); ctx.fillText('270°',cx+side*.465+18,cy+3);
+        ctx.fillStyle=`rgba(111,108,101,${w4})`; ctx.font='9px "JetBrains Mono",monospace'; ctx.textAlign='left';
+        ctx.fillText('+60°',cx+side*.155*.707+3,cy-side*.155*.707-3); ctx.fillText('+30°',cx+side*.31*.707+3,cy-side*.31*.707-3);
+        // the clusters: a small glow
+        for(const c of GC){
+          const q=polar(c[1],c[2]), gx=ox+q[0]*side, gy=oy+q[1]*side;
+          ctx.globalCompositeOperation='lighter';
+          const g=ctx.createRadialGradient(gx,gy,0,gx,gy,9);
+          g.addColorStop(0,`rgba(253,240,214,${.5*w4})`); g.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle=g; ctx.fillRect(gx-9,gy-9,18,18);
+          ctx.globalCompositeOperation='source-over';
+        }
+      }
+    }
+
+    const w4s=wOf(4), shrink=1-.38*w4s, calm=Math.min(1,wOf(0)+wOf(1)+wOf(2)+w4s);   // smaller stars on the sky map, so the clusters read
+    ctx.globalCompositeOperation='lighter';
+    if(w4s>.02){
+      const ap=smooth(clamp(w4s*1.6-.6,0,1));
+      for(const q of XS){
+        const tw=(REDUCE||!q.vr)?.78:.5+.5*Math.sin(t*(1.1+q.d*2.6)+q.ph), r=.38+q.a*.9;
+        ctx.globalAlpha=(.22+q.a*.7)*tw*ap; ctx.fillStyle=`rgb(${q.col[0]},${q.col[1]},${q.col[2]})`;
+        ctx.fillRect(ox+q.x*side-r,oy+q.y*side-r,r*2,r*2);
+      }
+    }
+    for(const p of P){
+      const a=p.T[st.from], b=p.T[st.to];
+      let x,y;
+      if(same){ x=a[0]; y=a[1]; }
+      else{
+        // each star leaves at its own moment and takes most of the scroll to arrive
+        const e0=clamp((st.e-p.d*.3)/.7,0,1), e=e0*e0*e0*(e0*(e0*6-15)+10), arc=Math.sin(e*Math.PI)*.05*p.sw;
+        x=a[0]+(b[0]-a[0])*e-(b[1]-a[1])*arc; y=a[1]+(b[1]-a[1])*e+(b[0]-a[0])*arc;
+      }
+      x=ox+x*side; y=oy+y*side;
+      if(x<-12||x>W+12||y<-12||y>H+12) continue;
+      // twinkle: a steady shimmer, plus an occasional flare
+      // on plates I, II, III and V only the variable stars change; elsewhere every star shimmers
+      let tw=.85, fl=0;
+      if(!REDUCE){
+        if(p.vr) tw=.5+.5*Math.sin(t*(1.1+p.d*2.6)+p.ph);
+        else if(calm<.99){ tw=.56+.44*Math.sin(t*(1.5+p.d*3.2)+p.ph);
+          fl=Math.pow(Math.max(0,Math.sin(t*(.35+p.d*.5)+p.ph*3)),24)*(1-calm);
+          tw=Math.min(1,tw+fl*.6); tw+=(.85-tw)*calm; }
+      }
+      let bf=1, c0=p.col[0], c1=p.col[1], c2=p.col[2];
+      if(famt>.004){
+        let f=wv[5]+wv[6]; for(let q=0;q<5;q++) f+=wv[q]*p.F[q];
+        bf=1+(f-1)*w0; const m=famt*(.85+.15*wv[6]);
+        c0+=(tr-c0)*m; c1+=(tg-c1)*m; c2+=(tb-c2)*m;
+      }
+      const big=1+(p.sz-1)*w0;
+      const r=(.55+p.a*1.9)*big*(.6+.4*bf)*shrink*(.82+.22*tw+.45*fl*shrink), al=.08+.92*bf;
+      ctx.fillStyle=`rgb(${c0|0},${c1|0},${c2|0})`;
+      if(p.a>.55){
+        ctx.globalAlpha=.07*tw*al; ctx.beginPath(); ctx.arc(x,y,r*2.8,0,6.283); ctx.fill();
+        ctx.globalAlpha=tw*al; ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fill();
+      } else {
+        ctx.globalAlpha=(.3+p.a*1.1)*tw*al; ctx.fillRect(x-r*.75,y-r*.75,r*1.5,r*1.5);
+      }
+      if(p.spec>=0&&w0>.02){
+        // diffraction spikes and a ring: these three can be pressed
+        const L=r*4.2; ctx.globalAlpha=.45*w0*al; ctx.strokeStyle=ctx.fillStyle; ctx.lineWidth=.9;
+        ctx.beginPath(); ctx.moveTo(x-L,y);ctx.lineTo(x+L,y);ctx.moveTo(x,y-L);ctx.lineTo(x,y+L); ctx.stroke();
+        if(!mobile){ const on=p.spec===sel;
+          ctx.globalAlpha=(on?.9:.4)*w0; ctx.strokeStyle=on?'#FDF8E9':'#ABA79D'; ctx.lineWidth=on?1.3:1;
+          if(!on) ctx.setLineDash([3,5]);
+          ctx.beginPath(); ctx.arc(x,y,22+(on&&!REDUCE?Math.sin(t*2.4)*1.5:0),0,6.283); ctx.stroke(); ctx.setLineDash([]); }
+      }
+    }
+    ctx.globalAlpha=1;
+    raf=requestAnimationFrame(frame);
+  }
+
+  layout(); yc=scrollY+H/2; moveAxis();
+  addEventListener('scroll',moveAxis,{passive:true});
+  let rt; const relayout=()=>{clearTimeout(rt);rt=setTimeout(()=>{layout();moveAxis()},80)};
+  addEventListener('resize',relayout);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(relayout);
+  addEventListener('load',relayout);
+  raf=requestAnimationFrame(frame);
+})();
+
+/* ============================================================
+   THE MODEL: 5 → 4 → 3 → 2 → 3 → 4 → 5
+   Pulses flow through the gated state autoencoder; on hover the
+   gates open and close each passband independently.
+   ============================================================ */
+(function(){
+  const cv=document.getElementById('gsa'), card=document.getElementById('pubcard');
+  if(!cv||!card) return;
+  const ctx=cv.getContext('2d');
+  const LAYERS=[5,4,3,2,3,4,5];
+  const BANDS=['#6686CC','#A1BEEE','#FDF8E9','#F0C998','#C38A6B'];
+  const INNER='#7D796F', BOTTLE='#FDF8E9';
+  let W=640,H=240,nodes=[],raf=null,running=false,gAmt=0,hovering=false;
+  const gw=[1.6,2.6,1.2,3.2,2.0], gp=[0,2.1,4.0,1.2,3.3];
+  const ARCS=[{a:1,b:5,col:'124,158,226',lift:44},{a:2,b:4,col:'231,179,135',lift:24}];
+
+  function build(){
+    const dpr=Math.min(devicePixelRatio||1,2);
+    W=cv.clientWidth||640; H=Math.max(215,Math.min(250,W*.4));
+    cv.style.height=H+'px'; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    const padX=Math.max(26,W*.07), sp=Math.min(32,(H-80)/4);
+    nodes=LAYERS.map((n,L)=>{
+      const x=padX+L*(W-2*padX)/(LAYERS.length-1);
+      return Array.from({length:n},(_,j)=>({x,y:H/2+18+(j-(n-1)/2)*sp}));
+    });
+  }
+  const T=3.4, SD=.135, easeIO=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
+  const gate=(i,t)=>1+((.06+.94*(.5+.5*Math.sin(t*gw[i]+gp[i])))-1)*gAmt;
+  function style(L,j){
+    if(L===0||L===6) return {color:BANDS[j],r:5.6};
+    if(L===3) return {color:BOTTLE,r:5.4};
+    return {color:INNER,r:4.2};
+  }
+  const qp=(p0,c,p1,q)=>{const u=1-q;return{x:u*u*p0.x+2*u*q*c.x+q*q*p1.x,y:u*u*p0.y+2*u*q*c.y+q*q*p1.y}};
+
+  function draw(now){
+    const t=now/1000; gAmt+=((hovering?1:0)-gAmt)*.12;
+    const tw=(t%T)/T; ctx.clearRect(0,0,W,H);
+    ctx.lineWidth=1; ctx.strokeStyle='rgba(253,248,233,0.075)';
+    for(let L=0;L<6;L++) for(const a of nodes[L]) for(const b of nodes[L+1]){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+
+    for(const arc of ARCS){
+      const p0={x:nodes[arc.a][0].x,y:nodes[arc.a][0].y-11}, p1={x:nodes[arc.b][0].x,y:nodes[arc.b][0].y-11};
+      const c={x:(p0.x+p1.x)/2,y:Math.min(p0.y,p1.y)-arc.lift};
+      ctx.strokeStyle=`rgba(${arc.col},.65)`; ctx.lineWidth=1.3; ctx.setLineDash([4,5]); ctx.lineDashOffset=REDUCE?0:-t*14;
+      ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.quadraticCurveTo(c.x,c.y,p1.x,p1.y); ctx.stroke(); ctx.setLineDash([]);
+      const apex=qp(p0,c,p1,.5);
+      ctx.font='10px "JetBrains Mono",monospace'; ctx.textAlign='center'; ctx.fillStyle=`rgba(${arc.col},.95)`;
+      ctx.fillText('h, c',apex.x,apex.y-5);
+      if(!REDUCE){ const dep=arc.a*SD, arr=arc.b*SD;
+        if(tw>dep&&tw<arr){ const pt=qp(p0,c,p1,easeIO((tw-dep)/(arr-dep))); ctx.fillStyle=`rgba(${arc.col},1)`; ctx.beginPath(); ctx.arc(pt.x,pt.y,2.6,0,7); ctx.fill(); } }
+    }
+    if(!REDUCE){
+      for(let s=0;s<6;s++){
+        const st0=s*SD; if(tw<st0||tw>st0+SD) continue;
+        const p=easeIO((tw-st0)/SD);
+        for(let ai=0;ai<nodes[s].length;ai++){ const a=nodes[s][ai];
+          for(let bi=0;bi<nodes[s+1].length;bi++){ const b=nodes[s+1][bi];
+            let col, alpha=.75*Math.sin(p*Math.PI);
+            if(s===0){col=BANDS[ai];alpha*=gate(ai,t)} else if(s===5){col=BANDS[bi];alpha*=gate(bi,t)} else {col='#D9D3C4';alpha*=.7}
+            ctx.globalAlpha=alpha; ctx.fillStyle=col; ctx.beginPath(); ctx.arc(a.x+(b.x-a.x)*p,a.y+(b.y-a.y)*p,1.9,0,7); ctx.fill();
+          } }
+      }
+      ctx.globalAlpha=1;
+    }
+    const act=L=>{ if(REDUCE) return 0; let d=tw-L*SD; if(d<0)d+=1; return Math.max(0,1-d/.14) };
+    for(let L=0;L<7;L++){ const aL=act(L);
+      for(let j=0;j<nodes[L].length;j++){
+        const n=nodes[L][j], st=style(L,j); let g=1; const base=(L===0||L===6||L===3)?1:.65;
+        if(L===0) g=gate(j,t); if(L===6) g=.3+.7*gate(j,t);
+        const r=st.r*(.7+.3*g)*(1+aL*.24), alpha=base*(.2+.8*g);
+        ctx.fillStyle=st.color;
+        ctx.globalAlpha=alpha*(.2+aL*.35); ctx.beginPath(); ctx.arc(n.x,n.y,r*2.8,0,7); ctx.fill();
+        ctx.globalAlpha=alpha; ctx.beginPath(); ctx.arc(n.x,n.y,r,0,7); ctx.fill();
+        if(L===3){ ctx.globalAlpha=.6+aL*.4; ctx.strokeStyle=BOTTLE; ctx.lineWidth=1.2; ctx.beginPath(); ctx.arc(n.x,n.y,r+3.6,0,7); ctx.stroke(); }
+      } }
+    ctx.globalAlpha=1;
+    if(running&&!REDUCE) raf=requestAnimationFrame(draw);
+  }
+  function startStop(on){
+    if(on&&!running){running=true;raf=requestAnimationFrame(draw)}
+    else if(!on&&running){running=false;cancelAnimationFrame(raf)}
+  }
+  build();
+  if(REDUCE) draw(0);
+  else new IntersectionObserver(es=>startStop(es[0].isIntersecting),{threshold:.1}).observe(cv);
+  card.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch')hovering=true});
+  card.addEventListener('pointerleave',()=>hovering=false);
+  card.addEventListener('focusin',()=>hovering=true);
+  card.addEventListener('focusout',()=>hovering=false);
+  cv.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')hovering=!hovering});
+  addEventListener('resize',()=>{build();if(REDUCE)draw(0)});
 })();
 </script>
 </body>
