@@ -202,7 +202,8 @@ section:nth-of-type(odd) h2 em{color:var(--blue-pale)}
 .theme .go{display:inline-block;margin-top:8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--copper)}
 
 /* honors */
-.feature{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:8px}
+.feature{display:grid;grid-template-columns:minmax(0,1fr);gap:30px;margin-bottom:8px}
+.big{min-width:0}
 .big::before{content:"====================================================================================================";
   display:block;overflow:hidden;white-space:nowrap;color:var(--c);line-height:16px;margin-bottom:8px}
 .big .y{font-size:11px;letter-spacing:.14em;color:var(--faint)}
