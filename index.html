@@ -3,19 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bradley D. Hutchinson — Applied Math · Astronomy · Machine Learning</title>
+<title>Bradley D. Hutchinson | Applied Math / Astronomy / Machine Learning</title>
 <meta name="description" content="Bradley D. Hutchinson — Ph.D. student in Applied Mathematics & Computational Science at the University of Pennsylvania, DOE Computational Science Graduate Fellow, and astronomer.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   ONE LIVING FIGURE
-   The page is laid out like a journal plate. Text runs down the
-   left; on the right, a single field of stars stays in view and
-   rearranges itself as you read: a cluster on the sky, the same
-   stars in two coordinates, a color-magnitude diagram, a spiral
-   galaxy, a polar map of the sky.
+   ASCII PLATE
+   Everything on the page is set in one monospace face and built
+   from characters: rules are rows of - and =, boxes have + corners,
+   and every figure (the star field and the model) is drawn on a
+   character grid, kept faint so it sits behind the words.
    Every star keeps one color throughout, drawn from a single
    ramp: blue for hot light, cream, then copper for cool light.
    ============================================================ */
@@ -24,8 +23,6 @@
   --ink:#F4EFE4;
   --soft:#ABA79D;
   --faint:#6F6C65;
-  --line:#25241F;
-  --line-2:#3A3832;
 
   --blue-deep:#6686CC;
   --blue:#7C9EE2;
@@ -36,286 +33,257 @@
   --copper-deep:#C38A6B;
   --ramp:linear-gradient(90deg,#6686CC 0%,#7C9EE2 16%,#A1BEEE 32%,#FDF8E9 50%,#F7DFB2 66%,#E7B387 82%,#C38A6B 100%);
 
-  --display:'Instrument Serif','Iowan Old Style',Georgia,serif;
-  --body:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
-  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+
+  /* one-character tiles, repeated to make rules and box edges */
+  --t-dash:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='16'%3E%3Ctext x='4' y='12' font-family='Menlo,Consolas,monospace' font-size='13' text-anchor='middle' fill='%2348463F'%3E-%3C/text%3E%3C/svg%3E");
+  --t-eq:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='16'%3E%3Ctext x='4' y='12' font-family='Menlo,Consolas,monospace' font-size='13' text-anchor='middle' fill='%235E5B54'%3E=%3C/text%3E%3C/svg%3E");
+  --t-bar:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='16'%3E%3Ctext x='4' y='12' font-family='Menlo,Consolas,monospace' font-size='13' text-anchor='middle' fill='%2348463F'%3E|%3C/text%3E%3C/svg%3E");
+  --t-plus:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='16'%3E%3Crect width='8' height='16' fill='%23030304'/%3E%3Ctext x='4' y='12' font-family='Menlo,Consolas,monospace' font-size='13' text-anchor='middle' fill='%236F6C65'%3E%2B%3C/text%3E%3C/svg%3E");
 
   --rail:clamp(150px,11.5vw,190px);
-  --colw:min(660px,calc(56vw - var(--rail)));
+  --colw:min(720px,calc(100vw - 2*var(--rail) - 24px));
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;color-scheme:dark}
 body{
   background:var(--bg);color:var(--ink);
-  font-family:var(--body);font-size:17px;line-height:1.65;
+  font-family:var(--mono);font-size:14px;line-height:1.7;
   -webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
-::selection{background:rgba(124,158,226,.35);color:#fff}
+::selection{background:var(--cream);color:#030304}
 a{color:inherit;text-decoration:none}
-a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+a:focus-visible{outline:1px dashed var(--blue);outline-offset:3px}
+em,i{font-style:normal}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* a box drawn with + - | */
+.abox{
+  background:
+    var(--t-plus) 0 0/8px 16px no-repeat, var(--t-plus) 100% 0/8px 16px no-repeat,
+    var(--t-plus) 0 100%/8px 16px no-repeat, var(--t-plus) 100% 100%/8px 16px no-repeat,
+    var(--t-dash) 0 0/8px 16px repeat-x, var(--t-dash) 0 100%/8px 16px repeat-x,
+    var(--t-bar) 0 0/8px 16px repeat-y, var(--t-bar) 100% 0/8px 16px repeat-y,
+    rgba(3,3,4,.84);
+}
 
 /* ---------- the figure (fixed, behind everything) ---------- */
-#plate{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none}
+#plate{position:fixed;inset:0;display:block;z-index:0;pointer-events:none;opacity:.42}
 .plate-cap{
-  position:fixed;z-index:1;bottom:30px;text-align:center;pointer-events:none;
-  font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--faint);
-  transition:opacity .4s ease;
+  position:fixed;z-index:1;right:28px;bottom:26px;text-align:right;pointer-events:none;opacity:.8;
+  font-size:11px;letter-spacing:.08em;color:var(--faint);transition:opacity .4s ease;
 }
-.plate-cap b{display:block;font-weight:500;color:var(--soft);letter-spacing:.2em;text-transform:uppercase;margin-bottom:5px}
-.plate-cap i{font-family:var(--display);font-style:italic;font-size:16.5px;letter-spacing:0;color:var(--ink);display:block}
-.plate-cap .bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:13px;text-transform:uppercase;font-size:10px;letter-spacing:.16em}
-.plate-cap .bar span.r{width:150px;height:3px;background:var(--ramp);border-radius:2px}
-
-/* ---------- hero instrument: filters, three stars, their light ---------- */
-.scope{width:100%;max-width:580px;padding:22px 24px 18px;background:rgba(3,3,4,.82);border:1px solid var(--line-2);position:relative}
-.scope::before,.scope::after{content:"";position:absolute;width:11px;height:11px;border:1px solid var(--soft)}
-.scope::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
-.scope::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
-.sc-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.sc-k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);width:46px;flex:none}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chips button{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--soft);background:none;
-  border:1px solid var(--line-2);border-radius:999px;padding:5px 11px;min-width:34px;cursor:pointer;
-  transition:color .2s,background .2s,border-color .2s}
-#filters button:not(:first-child):not(:last-child){font-family:var(--display);font-style:italic;font-size:15px;padding:2px 11px 4px}
-.chips button:hover{color:var(--ink);border-color:var(--soft)}
-.chips button.on{color:#030304;background:var(--c,var(--cream));border-color:transparent}
-.chips button:focus-visible,.spec:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-#sed{width:100%;height:auto;display:block;margin-top:14px}
-.sc-cap{font-family:var(--mono);font-size:10.5px;line-height:1.6;letter-spacing:.04em;color:var(--faint);margin-top:2px}
-.sc-cap span{color:var(--ink)}
-.sc-cap i{font-style:normal}
-.spec{position:fixed;z-index:4;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:none;border:0;
-  cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s}
-.spec.live{opacity:1;pointer-events:auto}
-.spec span{position:absolute;left:56px;top:50%;transform:translateY(-50%);white-space:nowrap;
-  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);transition:color .2s}
-.spec:hover span,.spec.on span{color:var(--ink)}
+.plate-cap b{display:block;font-weight:500;color:var(--soft);letter-spacing:.2em;text-transform:uppercase;margin-bottom:3px}
+.plate-cap b::before{content:"[ "}.plate-cap b::after{content:" ]"}
+.plate-cap i{font-size:13px;letter-spacing:0;color:var(--ink);display:block}
+.plate-cap .bar{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:9px;text-transform:uppercase;font-size:10px;letter-spacing:.16em}
+.plate-cap .bar span.r::before{content:"####################";letter-spacing:0;background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 /* ---------- left axis: the navigation is a ruler ---------- */
 .axis{position:fixed;z-index:5;left:0;top:0;bottom:0;width:var(--rail);pointer-events:none}
-.axis .spine{position:absolute;left:38px;top:13vh;bottom:13vh;width:1px;background:var(--line-2)}
-.axis .spine::before,.axis .spine::after{content:"";position:absolute;left:-4px;width:9px;height:1px;background:var(--line-2)}
-.axis .spine::before{top:0}.axis .spine::after{bottom:0}
-.axis .minor{position:absolute;left:38px;top:13vh;bottom:13vh;width:5px;
-  background:repeating-linear-gradient(180deg,var(--line-2) 0 1px,transparent 1px 14px)}
+.axis .spine{position:absolute;left:34px;top:13vh;bottom:13vh;width:8px;background:var(--t-bar) 0 0/8px 16px repeat-y}
+.axis .minor{display:none}
 .axis a{
-  position:absolute;left:38px;transform:translateY(-50%);pointer-events:auto;
-  display:flex;align-items:center;gap:9px;
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
-  transition:color .25s;
+  position:absolute;left:34px;transform:translateY(-50%);pointer-events:auto;
+  display:flex;align-items:center;gap:1ch;background:var(--bg);
+  font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);transition:color .25s;
 }
-.axis a::before{content:"";width:11px;height:1px;background:currentColor;transition:width .25s}
+.axis a::before{content:"+--";letter-spacing:0}
 .axis a:hover,.axis a.on{color:var(--ink)}
-.axis a.on::before{width:18px}
-.axis .mark{position:absolute;left:33px;width:11px;height:11px;border-radius:50%;margin-top:-5px;
-  background:var(--cream);box-shadow:0 0 0 3px var(--bg),0 0 14px 2px rgba(253,248,233,.55)}
-.axis a.name{position:absolute;left:30px;top:26px;transform:none;pointer-events:auto;display:block;
-  font-family:var(--display);font-size:19px;letter-spacing:0;text-transform:none;color:var(--ink);white-space:nowrap;
-  transition:opacity .4s ease}
-.axis a.name::before{display:none}
+.axis a.on::before{content:"+-->"}
+.axis .mark{position:absolute;left:34px;width:8px;margin-top:-11px;font-size:13px;line-height:22px;background:var(--bg);color:var(--cream)}
+.axis .mark::before{content:"@"}
+.axis a.name{position:absolute;left:30px;top:26px;transform:none;pointer-events:auto;display:block;background:none;
+  font-size:13px;letter-spacing:0;text-transform:none;color:var(--ink);white-space:nowrap;transition:opacity .4s ease}
+.axis a.name::before{content:"~/";color:var(--faint)}
 .axis.scrolled a.name{opacity:0;pointer-events:none}
-.axis .name em{font-style:italic;background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
+.axis .name em,.topbar .n em{background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 .topbar{display:none}
 
 /* ---------- column ---------- */
 main,header,footer{position:relative;z-index:2}
-.col{margin-left:var(--rail);width:var(--colw)}
+.col{margin:0 auto;width:var(--colw);background:rgba(3,3,4,.45);box-shadow:0 0 46px 46px rgba(3,3,4,.45)}
 
 /* ---------- hero ---------- */
 header{height:auto}
 .pin{position:relative;min-height:100vh;display:flex;align-items:center}
-.scope-wrap{padding:44px 0 0}
-.spectrum{padding-top:56px}
-.spectrum svg{display:block;overflow:visible}
-.spectrum .hit{cursor:pointer}
-.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);
-  display:flex;align-items:center;gap:12px;margin-bottom:26px;opacity:0;animation:rise .8s ease .15s forwards}
-.eyebrow::before{content:"";width:40px;height:2px;background:var(--ramp)}
-h1{font-family:var(--display);font-weight:400;font-size:clamp(52px,7.6vw,112px);line-height:.96;letter-spacing:-.015em;color:var(--cream)}
-h1 .line{display:block;overflow:hidden;padding-bottom:.08em}
-h1 .line span{display:inline-block;transform:translateY(110%);animation:lift 1.1s cubic-bezier(.2,.7,.2,1) forwards}
-h1 .line:nth-child(2) span{animation-delay:.12s;font-style:italic}
-h1 em{font-style:italic;background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero-sub{max-width:560px;font-size:clamp(17px,1.5vw,19.5px);color:var(--soft);margin-top:26px;opacity:0;animation:rise .9s ease .45s forwards}
-.hero-sub strong{color:var(--cream);font-weight:500;font-family:var(--display);font-style:italic;font-size:1.16em}
-.actions{display:flex;flex-wrap:wrap;gap:28px;margin-top:36px;opacity:0;animation:rise .9s ease .6s forwards}
-.lnk{font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);
-  padding-bottom:7px;position:relative;display:inline-flex;gap:10px;align-items:center}
-.lnk::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--ramp);
-  transform-origin:left;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
-.lnk.q::after{background:var(--line-2)}
-.lnk:hover::after{transform:scaleX(1.06)}
-.lnk.q:hover::after{background:var(--ramp)}
-.readout{margin-top:60px;display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:0;
-  border-top:1px solid var(--line-2);opacity:0;animation:rise 1s ease .75s forwards}
-.readout div{padding:14px 28px 0 0;margin-right:28px;position:relative;font-size:14px}
-.readout div::before{content:"";position:absolute;top:-1px;left:0;width:1px;height:7px;background:var(--soft)}
-.readout .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:2px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);
+  display:flex;align-items:center;justify-content:center;gap:1ch;margin-bottom:22px;opacity:0;animation:rise .8s ease .15s forwards}
+.eyebrow::before{content:">>";color:var(--blue);letter-spacing:0}
+.banner{width:max-content;margin:0 auto;font-family:var(--mono);font-weight:400;line-height:1.08;color:var(--cream);white-space:pre;
+  font-size:calc(var(--colw) / 37);opacity:0;animation:rise 1s ease .05s forwards}
+.banner .l2{display:block;background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{max-width:600px;margin-left:auto;margin-right:auto;text-align:center;font-size:14.5px;color:var(--soft);margin-top:22px;opacity:0;animation:rise .9s ease .45s forwards}
+.hero-sub strong{color:var(--cream);font-weight:600}
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-top:30px;opacity:0;animation:rise .9s ease .6s forwards}
+.lnk{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);display:inline-block;transition:color .2s}
+.lnk::before{content:"[ ";color:var(--copper)}
+.lnk::after{content:" ]";color:var(--copper)}
+.lnk.q{color:var(--soft)}
+.lnk.q::before,.lnk.q::after{color:var(--faint)}
+.lnk:hover{color:#030304;background:var(--cream)}
+.lnk:hover::before,.lnk:hover::after{color:#030304}
+.readout{margin-top:52px;padding-top:18px;display:grid;grid-template-columns:repeat(3,auto);justify-content:center;gap:0;text-align:center;
+  background:var(--t-dash) 0 0/8px 16px repeat-x;opacity:0;animation:rise 1s ease .75s forwards}
+.readout div{padding:0 1.5ch;font-size:13px}
+.readout .k{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:2px}
+.readout .k::after{content:":"}
 .readout .v{font-weight:600;color:var(--ink)}
 @media(min-width:641px){.readout div:not(:last-child) .v{white-space:nowrap}}
-.cue{position:absolute;left:var(--rail);bottom:28px;font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);
-  display:flex;align-items:center;gap:12px;opacity:0;animation:rise 1s ease 1.1s forwards}
-.cue::before{content:"";width:1px;height:30px;background:linear-gradient(var(--cream),transparent);animation:drip 2.2s ease-in-out infinite}
+.cue{position:absolute;left:0;right:0;justify-content:center;bottom:28px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);
+  display:flex;align-items:center;gap:1ch;opacity:0;animation:rise 1s ease 1.1s forwards}
+.cue::before{content:"v";color:var(--cream);animation:blink 1.2s steps(1) infinite}
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-@keyframes lift{to{transform:none}}
-@keyframes drip{0%,100%{transform:scaleY(.35);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}}
+@keyframes blink{50%{opacity:0}}
 
 /* ---------- sections: figure panels ---------- */
 section{padding:clamp(80px,13vh,150px) 0}
-.panel{display:flex;align-items:baseline;gap:16px;margin-bottom:26px;
-  border-top:1px solid var(--line-2);padding-top:14px;position:relative}
-.panel::before{content:"";position:absolute;top:-1px;left:0;width:64px;height:2px;background:var(--ramp)}
-.panel::after{content:"";position:absolute;top:0;left:0;right:0;height:6px;
-  background:repeating-linear-gradient(90deg,var(--line-2) 0 1px,transparent 1px 33px)}
-.panel b{font-family:var(--body);font-weight:700;font-size:21px;color:var(--cream)}
-.panel span{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
-h2{font-family:var(--display);font-weight:400;font-size:clamp(34px,4.1vw,56px);line-height:1.04;letter-spacing:-.01em;color:var(--cream);margin-bottom:18px}
-h2 em{font-style:italic;color:var(--copper)}
+.panel{display:flex;align-items:center;gap:1ch;margin-bottom:22px;color:var(--soft);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.panel::before{content:"==";letter-spacing:0;background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
+.panel::after{content:"";flex:1;height:16px;background:var(--t-eq) 0 50%/8px 16px repeat-x}
+.panel b{font-weight:700;color:var(--cream);letter-spacing:0}
+.panel b::before{content:"["}.panel b::after{content:"]"}
+h2{font-family:var(--mono);font-weight:600;font-size:clamp(20px,2.2vw,28px);line-height:1.25;color:var(--cream);margin-bottom:16px}
+h2::before{content:"# ";color:var(--faint)}
+h2 em{color:var(--copper)}
 section:nth-of-type(odd) h2 em{color:var(--blue-pale)}
-.lede{color:var(--soft);max-width:560px;margin-bottom:40px;font-size:17.5px}
+.lede{color:var(--soft);max-width:560px;margin-bottom:36px;font-size:14px}
 
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
 .reveal.in{opacity:1;transform:none}
 
 /* about */
 .prose p{color:var(--soft)}
-.prose p+p{margin-top:18px}
+.prose p+p{margin-top:16px}
 .prose strong{color:var(--ink);font-weight:600}
-.prose p:first-child::first-letter{font-family:var(--display);font-size:3.3em;line-height:.82;float:left;padding:6px 10px 0 0;color:var(--cream)}
-.table{margin-top:44px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
-.table caption,.tcap{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:44px 0 10px}
+.tcap{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:40px 0 4px}
+.table{margin-top:40px;padding:16px 0;background:var(--t-eq) 0 0/8px 16px repeat-x,var(--t-eq) 0 100%/8px 16px repeat-x}
 .tcap+.table{margin-top:0}
-.row{display:grid;grid-template-columns:130px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14.5px}
-.row:last-child{border-bottom:0}
-.row .k{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding-top:3px}
+.row{display:grid;grid-template-columns:130px 1fr;gap:16px;padding:8px 0 20px;background:var(--t-dash) 0 100%/8px 16px repeat-x;font-size:13.5px}
+.row:last-child{background:none;padding-bottom:6px}
+.row .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding-top:2px}
 .row .v{font-weight:600;color:var(--ink)}
 
 /* education: a track of points, blue to copper */
 .track{position:relative}
-.track::before{content:"";position:absolute;left:5px;top:10px;bottom:10px;width:1px;background:linear-gradient(var(--blue),var(--cream),var(--copper-deep))}
-.stop{position:relative;padding:0 0 46px 40px}
+.track::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:8px;background:var(--t-bar) 0 0/8px 16px repeat-y}
+.stop{position:relative;padding:0 0 42px 4ch}
 .stop:last-child{padding-bottom:0}
-.stop::before{content:"";position:absolute;left:0;top:8px;width:11px;height:11px;border-radius:50%;
-  background:var(--c);box-shadow:0 0 0 4px var(--bg),0 0 16px 1px var(--c);transition:transform .3s}
-.stop:hover::before{transform:scale(1.35)}
-.stop .d{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
-.stop .t{font-family:var(--display);font-size:29px;line-height:1.15;margin:5px 0 6px;color:var(--cream)}
-.stop .s{color:var(--soft);font-size:15.5px}
-.note{margin-top:14px;padding-left:16px;border-left:1px solid var(--line-2);font-size:14px;color:var(--soft)}
-.note .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:3px}
-.note em{font-family:var(--display);font-style:italic;font-size:18px;color:var(--ink);line-height:1.3;display:block}
+.stop::before{content:"@";position:absolute;left:0;top:0;width:8px;background:var(--bg);color:var(--c);font-weight:700}
+.stop .d{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.stop .t{font-size:17px;font-weight:600;line-height:1.3;margin:4px 0 6px;color:var(--cream)}
+.stop .s{color:var(--soft);font-size:13.5px}
+.note{margin-top:12px;padding-left:2.5ch;background:var(--t-bar) 0 0/8px 16px repeat-y;font-size:13px;color:var(--soft)}
+.note .k{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:2px}
+.note em{font-size:13.5px;color:var(--ink);line-height:1.5;display:block}
 
 /* research */
-.pub{border:1px solid var(--line-2);position:relative;transition:border-color .4s}
-.pub:hover{border-color:#5a564c}
-.pub::before,.pub::after{content:"";position:absolute;width:11px;height:11px;border:1px solid var(--soft)}
-.pub::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
-.pub::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
-.pub-viz{border-bottom:1px solid var(--line);padding:12px 12px 8px;position:relative}
-#gsa{width:100%;height:auto;display:block}
-.pub-viz .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;text-align:center;padding:2px 0 6px}
+.pub{padding:16px 10px}
+.pub-viz{padding:4px 12px 22px;background:var(--t-dash) 0 100%/8px 16px repeat-x}
+#gsa{display:block;margin:0 auto}
+.pub-viz .cap{font-size:10.5px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase;text-align:center;padding:2px 0 0}
 .cap-hover{opacity:.6;transition:opacity .3s,color .3s}
 .pub:hover .cap-hover{opacity:1;color:var(--copper)}
-.pub-main{padding:clamp(22px,3vw,34px)}
-.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue-pale);margin-bottom:12px}
-.pub-title{font-family:var(--display);font-weight:400;font-size:clamp(25px,2.6vw,33px);line-height:1.14;color:var(--cream)}
-.pub-authors{margin-top:14px;color:var(--soft);font-size:15px}
+.pub-main{padding:clamp(18px,2.6vw,28px)}
+.kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue-pale);margin-bottom:10px}
+.pub-title{font-weight:600;font-size:clamp(16px,1.5vw,19px);line-height:1.4;color:var(--cream)}
+.pub-authors{margin-top:12px;color:var(--soft);font-size:13.5px}
 .pub-authors strong{color:var(--ink)}
-.pub-ref{margin-top:4px;font-family:var(--mono);font-size:12px;color:var(--faint)}
-.pub-blurb{margin-top:18px;color:var(--soft);font-size:15.5px}
-.pub-main .lnk{margin-top:24px}
-.themes{margin-top:34px;border-top:1px solid var(--line-2)}
-.theme{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:20px 0;border-bottom:1px solid var(--line);position:relative;transition:padding .3s}
-.theme::before{content:"";position:absolute;left:0;top:-1px;height:1px;width:0;background:var(--c);transition:width .5s cubic-bezier(.2,.7,.2,1)}
-.theme:hover::before{width:100%}
-.theme h3{font-family:var(--display);font-weight:400;font-size:22px;line-height:1.2;color:var(--cream)}
-.theme h3::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c);margin-right:11px;transform:translateY(-3px)}
-.theme p{font-size:14.5px;color:var(--soft);line-height:1.55}
-.theme .go{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--copper)}
+.pub-ref{margin-top:4px;font-size:12px;color:var(--faint)}
+.pub-blurb{margin-top:16px;color:var(--soft);font-size:13.5px}
+.pub-main .lnk{margin-top:22px}
+.themes{margin-top:30px;padding-top:16px;background:var(--t-dash) 0 0/8px 16px repeat-x}
+.theme{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:12px 0 28px;background:var(--t-dash) 0 100%/8px 16px repeat-x}
+.theme h3{font-weight:600;font-size:14.5px;line-height:1.4;color:var(--cream)}
+.theme h3::before{content:"* ";color:var(--c)}
+.theme:hover h3{color:var(--c)}
+.theme p{font-size:13px;color:var(--soft);line-height:1.6}
+.theme .go{display:inline-block;margin-top:8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--copper)}
 
 /* honors */
 .feature{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:8px}
-.big{padding-top:16px;border-top:2px solid var(--c)}
-.big .y{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--faint)}
-.big h3{font-family:var(--display);font-weight:400;font-size:27px;line-height:1.12;margin:8px 0 8px;color:var(--cream)}
-.big p{font-size:14px;color:var(--soft);line-height:1.55}
-.hrow{display:grid;grid-template-columns:104px 1fr auto;gap:14px;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--line);transition:background .2s,padding .25s}
-.hrow:last-child{border-bottom:0}
-.hrow:hover{background:linear-gradient(90deg,rgba(253,248,233,.045),transparent);padding-left:8px}
-.hrow .y{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
-.hrow .n{font-weight:600;font-size:15px;color:var(--ink);line-height:1.4}
-.hrow .o{font-size:12.5px;color:var(--soft);text-align:right}
+.big::before{content:"====================================================================================================";
+  display:block;overflow:hidden;white-space:nowrap;color:var(--c);line-height:16px;margin-bottom:8px}
+.big .y{font-size:11px;letter-spacing:.14em;color:var(--faint)}
+.big h3{font-weight:600;font-size:16px;line-height:1.35;margin:6px 0 8px;color:var(--cream)}
+.big p{font-size:13px;color:var(--soft);line-height:1.6}
+.hrow{display:grid;grid-template-columns:104px 1fr auto;gap:14px;align-items:baseline;padding:8px 0 20px;background:var(--t-dash) 0 100%/8px 16px repeat-x}
+.hrow:last-child{background:none;padding-bottom:6px}
+.hrow:hover .n{color:var(--copper)}
+.hrow .y{font-size:11.5px;color:var(--faint)}
+.hrow .n{font-weight:600;font-size:13.5px;color:var(--ink);line-height:1.45;transition:color .2s}
+.hrow .o{font-size:12px;color:var(--soft);text-align:right}
 
 /* talks */
-.talk{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:22px 0;border-bottom:1px solid var(--line)}
-.talk:first-child{border-top:1px solid var(--line-2)}
-.talk .date{font-family:var(--mono);font-size:11.5px;color:var(--faint);padding-top:3px}
-.tag{display:block;margin-top:7px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.talk{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:14px 0 30px;background:var(--t-dash) 0 100%/8px 16px repeat-x}
+.talk:first-child{padding-top:30px;background:var(--t-dash) 0 0/8px 16px repeat-x,var(--t-dash) 0 100%/8px 16px repeat-x}
+.talk .date{font-size:11.5px;color:var(--faint);padding-top:2px}
+.tag{display:block;margin-top:6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
 .tag.inv{color:var(--blue-pale)}.tag.pos{color:var(--copper)}
-.tag::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:7px;transform:translateY(-1px)}
-.talk .venue{font-weight:700;font-size:14.5px;color:var(--ink)}
-.talk .title{font-family:var(--display);font-style:italic;font-size:20px;line-height:1.3;color:var(--soft);margin-top:4px;transition:color .3s}
+.tag::before{content:"* "}
+.talk .venue{font-weight:700;font-size:13.5px;color:var(--ink)}
+.talk .title{font-size:13.5px;line-height:1.55;color:var(--soft);margin-top:4px;transition:color .3s}
 .talk:hover .title{color:var(--cream)}
-.talk .org{margin-top:7px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint)}
+.talk .org{margin-top:6px;font-size:11px;letter-spacing:.06em;color:var(--faint)}
 
 /* skills */
-.kit{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
-.kit .row{grid-template-columns:170px 1fr;align-items:baseline;padding:16px 0}
-.kit .row .k::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);margin-right:10px}
-.items{display:flex;flex-wrap:wrap;gap:6px 0;font-weight:500;font-size:15px;color:var(--ink)}
+.kit{padding:16px 0;background:var(--t-eq) 0 0/8px 16px repeat-x,var(--t-eq) 0 100%/8px 16px repeat-x}
+.kit .row{grid-template-columns:190px 1fr;align-items:baseline}
+.kit .row .k::before{content:"* ";color:var(--c)}
+.items{display:flex;flex-wrap:wrap;gap:4px 0;font-weight:500;font-size:13.5px;color:var(--ink)}
 .items span{transition:color .2s}
-.items span:not(:last-child)::after{content:"·";margin:0 11px;color:var(--faint)}
+.items span:not(:last-child)::after{content:"/";margin:0 1.2ch;color:var(--faint)}
 .items span:hover{color:var(--copper)}
 
 /* footer */
 footer{padding:clamp(100px,18vh,190px) 0 40px}
-footer h2{font-size:clamp(40px,5.2vw,76px)}
+footer h2{font-size:clamp(24px,3vw,38px)}
 footer h2 em{background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
-footer .lede{margin-bottom:34px}
-.f-links{margin-top:54px;display:flex;flex-wrap:wrap;gap:28px;font-family:var(--mono);font-size:12px;color:var(--soft)}
-.f-links a{border-bottom:1px solid var(--line-2);transition:color .2s,border-color .2s}
-.f-links a:hover{color:var(--cream);border-color:var(--cream)}
-.f-bottom{margin-top:46px;padding-top:20px;position:relative;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
-  font-family:var(--mono);font-size:11px;color:var(--faint)}
-.f-bottom::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--ramp);opacity:.85}
+footer .lede{margin-bottom:30px}
+footer .actions{justify-content:flex-start}
+footer .lnk{text-transform:none;letter-spacing:.02em}
+.f-links{margin-top:50px;display:flex;flex-wrap:wrap;gap:28px;font-size:12px;color:var(--soft)}
+.f-links a::before{content:"<"}.f-links a::after{content:">"}
+.f-links a:hover{color:var(--cream)}
+.f-bottom{margin-top:42px;padding-top:26px;position:relative;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--faint)}
+.f-bottom::before{content:"========================================================================================================================";
+  position:absolute;top:0;left:0;right:0;overflow:hidden;white-space:nowrap;line-height:16px;font-size:13px;
+  background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 /* ---------- narrow screens: the figure moves behind the text ---------- */
 @media(max-width:1040px){
   :root{--rail:clamp(20px,5vw,40px);--colw:calc(100vw - 2*var(--rail))}
-  .axis,.plate-cap,.cue,.spec{display:none}
-  .scope{padding:16px 16px 12px}
-  #plate{opacity:.42}
+  .axis,.plate-cap,.cue{display:none}
+  #plate{opacity:.34}
   .col{max-width:700px}
+  .banner{font-size:min(calc(var(--colw) / 33),21px)}
   .topbar{display:flex;position:fixed;z-index:6;top:0;left:0;right:0;justify-content:space-between;align-items:center;
-    padding:13px var(--rail);background:rgba(3,3,4,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-  .topbar .n{font-family:var(--display);font-size:19px}
-  .topbar .n em{font-style:italic;background:var(--ramp);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .topbar a.c{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+    padding:11px var(--rail) 17px;background:var(--t-dash) 0 100%/8px 16px repeat-x,rgba(3,3,4,.9)}
+  .topbar .n{font-size:13px}
+  .topbar a.c{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+  .topbar a.c::before{content:"[ "}.topbar a.c::after{content:" ]"}
   header{padding:90px 0 0}
   .pin{min-height:0;display:block}
-
-  section,footer{background:linear-gradient(180deg,transparent,rgba(3,3,4,.62) 90px,rgba(3,3,4,.62) calc(100% - 90px),transparent)}
+  section,footer{background:linear-gradient(180deg,transparent,rgba(3,3,4,.7) 90px,rgba(3,3,4,.7) calc(100% - 90px),transparent)}
 }
 @media(max-width:640px){
   .readout{grid-template-columns:1fr}
-  .readout div{padding-bottom:4px}
+  .readout div{padding-bottom:6px}
   .feature{grid-template-columns:1fr}
-  .theme{grid-template-columns:1fr;gap:8px}
+  .theme{grid-template-columns:1fr;gap:6px}
   .hrow{grid-template-columns:1fr;gap:1px}
   .hrow .o{text-align:left}
   .talk{grid-template-columns:1fr;gap:6px}
   .talk .date{display:flex;gap:14px;align-items:center}
   .tag{margin-top:0}
-  .row,.kit .row{grid-template-columns:1fr;gap:4px}
+  .row,.kit .row{grid-template-columns:1fr;gap:2px}
 }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
   html{scroll-behavior:auto}
   .reveal{opacity:1;transform:none}
-  h1 .line span{transform:none}
-  .eyebrow,.hero-sub,.actions,.readout,.cue{opacity:1}
+  .eyebrow,.hero-sub,.actions,.readout,.cue,.banner{opacity:1}
 }
 </style>
 </head>
@@ -323,13 +291,9 @@ footer .lede{margin-bottom:34px}
 
 <canvas id="plate" aria-hidden="true"></canvas>
 <div class="plate-cap" id="cap" aria-hidden="true">
-  <b id="capN">Plate I</b><i id="capT">A field of stars, one filter at a time.</i>
+  <b id="capN">Plate I</b><i id="capT">A field of stars.</i>
   <div class="bar">hot <span class="r"></span> cool</div>
 </div>
-
-<button class="spec" type="button" aria-label="Show the light of the hot star"><span>Hot</span></button>
-<button class="spec" type="button" aria-label="Show the light of the Sun-like star"><span>Sun-like</span></button>
-<button class="spec" type="button" aria-label="Show the light of the cool star"><span>Cool</span></button>
 
 <nav class="axis" id="axis" aria-label="Sections">
   <a class="name" href="#top">B. D. Hutchinson<em>.</em></a>
@@ -347,38 +311,31 @@ footer .lede{margin-bottom:34px}
 <header id="top">
  <div class="pin">
   <div class="col">
-    <p class="eyebrow">Applied Math &amp; Computational Science · Astronomy · Philadelphia</p>
-    <h1>
-      <span class="line"><span>Bradley D.</span></span>
-      <span class="line"><span>Hutchinson<em>.</em></span></span>
-    </h1>
+    <p class="eyebrow">Applied Math &amp; Computational Science | Astronomy | Philadelphia</p>
+<h1 class="sr">Bradley D. Hutchinson.</h1>
+<pre class="banner" aria-hidden="true"> ____                _ _              ____
+| __ ) _ __ __ _  __| | | ___ _   _  |  _ \
+|  _ \| &#x27;__/ _` |/ _` | |/ _ \ | | | | | | |
+| |_) | | | (_| | (_| | |  __/ |_| | | |_| |
+|____/|_|  \__,_|\__,_|_|\___|\__, | |____(_)
+                              |___/
+<span class="l2"> _   _       _       _     _
+| | | |_   _| |_ ___| |__ (_)_ __  ___  ___  _ __
+| |_| | | | | __/ __| &#x27;_ \| | &#x27;_ \/ __|/ _ \| &#x27;_ \
+|  _  | |_| | || (__| | | | | | | \__ \ (_) | | | |_
+|_| |_|\__,_|\__\___|_| |_|_|_| |_|___/\___/|_| |_(_)</span></pre>
     <p class="hero-sub">I build artificial intelligence that learns from <strong>how the Universe is measured</strong>. My research develops measurement-constrained models for extracting physical structure from massive photometric surveys.</p>
     <div class="actions">
-      <a class="lnk" href="#research">See my research ↓</a>
-      <a class="lnk q" href="mailto:bhutchin@upenn.edu">Get in touch</a>
+      <a class="lnk" href="#research">Research</a>
+      <a class="lnk q" href="mailto:bhutchin@upenn.edu">Email</a>
     </div>
     <div class="readout">
       <div><span class="k">Now</span><span class="v">AMCS Ph.D. @ Penn</span></div>
-      <div><span class="k">Fellowship</span><span class="v">DOE CSGF, 2026–2030</span></div>
+      <div><span class="k">Fellowship</span><span class="v">DOE CSGF, 2026-2030</span></div>
       <div><span class="k">Latest</span><span class="v">The Astronomical Journal, 170, 255</span></div>
     </div>
   </div>
   <div class="cue">Scroll</div>
- </div>
- <div class="col spectrum" id="spectrum"></div>
- <div class="col scope-wrap">
-    <div class="scope" id="scope">
-      <div class="sc-row"><span class="sc-k">Filter</span>
-        <div class="chips" id="filters">
-<button type="button" data-f="6">white</button><button type="button" data-f="0" style="--c:#8FD9C4">g</button><button type="button" data-f="1" style="--c:#F4B06A">r</button><button type="button" data-f="2" style="--c:#EE7D5E">i</button><button type="button" data-f="3" style="--c:#D0608A">z</button><button type="button" data-f="4" style="--c:#A068B0">y</button><button type="button" data-f="5">all</button>
-        </div></div>
-      <div class="sc-row"><span class="sc-k">Star</span>
-        <div class="chips" id="stars">
-          <button type="button" style="--c:#7C9EE2">Hot</button><button type="button" style="--c:#FDF8E9">Sun-like</button><button type="button" style="--c:#E7B387">Cool</button>
-        </div></div>
-      <svg id="sed" viewBox="0 0 320 138" role="img" aria-label="Brightness of the selected star across five filters"></svg>
-      <p class="sc-cap"><span id="sedName"></span><br>Its light across the five filters.<i> Press a filter to hold it, and a star or its curve to change the star.</i></p>
-    </div>
  </div>
 </header>
 
@@ -386,19 +343,19 @@ footer .lede{margin-bottom:34px}
 <section id="about">
   <div class="col">
     <div class="panel reveal"><b>A</b><span>About</span></div>
-    <h2 class="reveal">Astronomer by training, <em>computational scientist</em> by method.</h2>
+    <h2 class="reveal">From physics, mathematics and astronomy to <em>computational science.</em></h2>
     <div class="prose reveal">
       <p>I'm an <strong>Applied Mathematics &amp; Computational Science (AMCS) Ph.D. student at the University of Pennsylvania</strong> and a <strong>Department of Energy Computational Science Graduate Fellow</strong>. I graduated from Indiana University with degrees in Astronomy/Astrophysics, Mathematics, and Physics.</p>
       <p>My research sits where big survey astronomy meets representation learning and computational mathematics. Modern telescopes image billions of objects through many filters — far too many for any human to inspect. I build <strong>wavelength-aware, unsupervised methods</strong> that let the data organize itself, surfacing rare and anomalous objects hiding in plain sight and using this organization to produce products useful to astronomers.</p>
       <p>Previously, I was an <strong>AstroAI Institute intern at the Center for Astrophysics | Harvard &amp; Smithsonian</strong>, working on mechanistic interpretability of the wavelength-aware autoencoder before starting my doctorate in Philadelphia.</p>
     </div>
-    <p class="tcap reveal">Table 1 · At a glance</p>
+    <p class="tcap reveal">Table 1 | At a glance</p>
     <aside class="table reveal">
       <div class="row"><span class="k">Now</span><span class="v">AMCS Ph.D. Student, UPenn</span></div>
       <div class="row"><span class="k">Fellowship</span><span class="v">DOE CSGF Fellow</span></div>
       <div class="row"><span class="k">From</span><span class="v">Indiana University, '26</span></div>
-      <div class="row"><span class="k">Degrees</span><span class="v">B.S. Astronomy/Astrophysics · B.S. Mathematics · B.A. Physics</span></div>
-      <div class="row"><span class="k">Languages</span><span class="v">EN · ES · JA</span></div>
+      <div class="row"><span class="k">Degrees</span><span class="v">B.S. Astronomy/Astrophysics | B.S. Mathematics | B.A. Physics</span></div>
+      <div class="row"><span class="k">Languages</span><span class="v">EN | ES | JA</span></div>
     </aside>
   </div>
 </section>
@@ -406,11 +363,11 @@ footer .lede{margin-bottom:34px}
 <section id="education">
   <div class="col">
     <div class="panel reveal"><b>B</b><span>Education</span></div>
-    <h2 class="reveal">Indiana <em>&#8594;</em> Philadelphia</h2>
+    <h2 class="reveal">Indiana <em>-&gt;</em> Philadelphia</h2>
     <p class="lede reveal">From a full-ride at Indiana to a federally funded doctorate in Applied Mathematics &amp; Computational Science at Penn.</p>
     <div class="track">
       <div class="stop reveal" style="--c:var(--blue)">
-        <div class="d">Aug. 2026 – Present</div>
+        <div class="d">Aug. 2026 - Present</div>
         <div class="t">University of Pennsylvania</div>
         <div class="s">Ph.D., Applied Mathematics &amp; Computational Science — supported by the DOE Computational Science Graduate Fellowship</div>
       </div>
@@ -419,16 +376,16 @@ footer .lede{margin-bottom:34px}
         <div class="t">Center for Astrophysics | Harvard &amp; Smithsonian</div>
         <div class="s">Research Intern — AstroAI Institute</div>
         <div class="note">
-          <span class="k">Advisors · Mike Smith &amp; Cecilia Garraffo</span>
+          <span class="k">Advisors | Mike Smith &amp; Cecilia Garraffo</span>
           <em>Mechanistic interpretability of the wavelength-aware autoencoder</em>
         </div>
       </div>
       <div class="stop reveal" style="--c:var(--copper)">
-        <div class="d">Aug. 2022 – May 2026</div>
+        <div class="d">Aug. 2022 - May 2026</div>
         <div class="t">Indiana University</div>
-        <div class="s">B.S. Astronomy/Astrophysics with Honors · B.S. Mathematics · B.A. Physics<br>Jesse H. &amp; Beulah Chanley Cox Scholar — full ride with a 1,200-hour work-study commitment</div>
+        <div class="s">B.S. Astronomy/Astrophysics with Honors | B.S. Mathematics | B.A. Physics<br>Jesse H. &amp; Beulah Chanley Cox Scholar — full ride with a 1,200-hour work-study commitment</div>
         <div class="note">
-          <span class="k">Honors thesis · advised by Catherine A. Pilachowski</span>
+          <span class="k">Honors thesis | advised by Catherine A. Pilachowski</span>
           <em>A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor Photometric Surveys</em>
         </div>
       </div>
@@ -439,21 +396,21 @@ footer .lede{margin-bottom:34px}
 <section id="research">
   <div class="col">
     <div class="panel reveal"><b>C</b><span>Research</span></div>
-    <h2 class="reveal">Letting surveys <em>sort themselves.</em></h2>
+    <h2 class="reveal">Physical structure from <em>survey photometry.</em></h2>
     <p class="lede reveal">First-author work published in The Astronomical Journal and interviewed by the American Astronomical Society.</p>
 
-    <article class="pub reveal" id="pubcard" tabindex="0">
+    <article class="pub abox reveal" id="pubcard" tabindex="0">
       <div class="pub-viz">
-        <canvas id="gsa" width="640" height="240" aria-label="Animated diagram: five passbands compress through a two-dimensional bottleneck and are reconstructed"></canvas>
-        <p class="cap">5 → 4 → 3 → 2 → 3 → 4 → 5 <span class="cap-hover">· hover: gates choose what speaks</span></p>
+        <canvas id="gsa" aria-label="Animated diagram: five passbands compress through a two-dimensional bottleneck and are reconstructed"></canvas>
+        <p class="cap">5 -&gt; 4 -&gt; 3 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 <span class="cap-hover">| hover to open and close the gates</span></p>
       </div>
       <div class="pub-main">
-        <div class="kicker">Publication · 2025</div>
+        <div class="kicker">Publication | 2025</div>
         <h3 class="pub-title">A Wavelength-aware Unsupervised Learning Approach for Large, Multicolor, Photometric Surveys</h3>
         <p class="pub-authors"><strong>Hutchinson, B. D.</strong>, Pilachowski, C. A., &amp; Johnson, C. I.</p>
-        <p class="pub-ref">The Astronomical Journal, 170, 255 · doi:10.3847/1538-3881/adf437</p>
+        <p class="pub-ref">The Astronomical Journal, 170, 255 | doi:10.3847/1538-3881/adf437</p>
         <p class="pub-blurb">A compact, gated state autoencoder for multicolor photometry. Learned gates decide, object by object, which passbands carry signal and which are noise, compressing each source into a low-dimensional map where physical structure — and the anomalies that break it — emerge without labels.</p>
-        <a class="lnk" href="https://doi.org/10.3847/1538-3881/adf437" target="_blank" rel="noopener">Read the paper <span>→</span></a>
+        <a class="lnk" href="https://doi.org/10.3847/1538-3881/adf437" target="_blank" rel="noopener">Read the paper -&gt;</a>
       </div>
     </article>
 
@@ -468,7 +425,7 @@ footer .lede{margin-bottom:34px}
       </div>
       <a class="theme reveal" style="--c:var(--copper)" href="https://www.youtube.com/watch?v=LM9TF7DOo4M" target="_blank" rel="noopener">
         <h3>Interviewed by the AAS</h3>
-        <p>The American Astronomical Society's author interview on the paper and the wavelength-aware approach behind it.<br><span class="go">Watch the interview →</span></p>
+        <p>The American Astronomical Society's author interview on the paper and the wavelength-aware approach behind it.<br><span class="go">Watch the interview -&gt;</span></p>
       </a>
     </div>
   </div>
@@ -482,7 +439,7 @@ footer .lede{margin-bottom:34px}
 
     <div class="feature">
       <div class="big reveal" style="--c:var(--copper)">
-        <span class="y">2026 – 2030</span>
+        <span class="y">2026 - 2030</span>
         <h3>DOE Computational Science Graduate Fellowship</h3>
         <p>U.S. Department of Energy — one of the nation's most competitive fellowships for doctoral computational research.</p>
       </div>
@@ -493,12 +450,12 @@ footer .lede{margin-bottom:34px}
       </div>
     </div>
 
-    <p class="tcap reveal">Table 2 · Scholarships, prizes &amp; programs</p>
+    <p class="tcap reveal">Table 2 | Scholarships, prizes &amp; programs</p>
     <div class="table reveal">
-      <div class="hrow"><span class="y">2024 · 25 · 26</span><span class="n">Hollis &amp; Grete Johnson Undergraduate Research Prize</span><span class="o">IU Astronomy</span></div>
+      <div class="hrow"><span class="y">2024 | 25 | 26</span><span class="n">Hollis &amp; Grete Johnson Undergraduate Research Prize</span><span class="o">IU Astronomy</span></div>
       <div class="hrow"><span class="y">2024</span><span class="n">Hugh Brown Memorial Scholarship</span><span class="o">IU Physics</span></div>
       <div class="hrow"><span class="y">2024</span><span class="n">Barry Goldwater Scholar Nominee</span><span class="o">IU College of Arts &amp; Sciences</span></div>
-      <div class="hrow"><span class="y">2022 – 26</span><span class="n">Cox Scholarship (full ride)</span><span class="o">Cox Scholars Program</span></div>
+      <div class="hrow"><span class="y">2022 - 26</span><span class="n">Cox Scholarship (full ride)</span><span class="o">Cox Scholars Program</span></div>
       <div class="hrow"><span class="y">2026</span><span class="n">AstroAI Institute Summer Internship</span><span class="o">CfA | Harvard &amp; Smithsonian</span></div>
       <div class="hrow"><span class="y">2025</span><span class="n">Fleischer Summer Research Scholarship</span><span class="o">IU College of Arts &amp; Sciences</span></div>
       <div class="hrow"><span class="y">2024</span><span class="n">Alice Palma Summer Undergraduate Research Program</span><span class="o">IU Astronomy</span></div>
@@ -510,7 +467,7 @@ footer .lede{margin-bottom:34px}
 <section id="talks">
   <div class="col">
     <div class="panel reveal"><b>E</b><span>Presentations</span></div>
-    <h2 class="reveal">Sharing the <em>work.</em></h2>
+    <h2 class="reveal">Talks &amp; <em>posters.</em></h2>
     <p class="lede reveal">Five invited talks and two posters across CERN, STScI, Harvard, and the American Astronomical Society.</p>
     <div class="talks">
       <div class="talk reveal">
@@ -556,7 +513,7 @@ footer .lede{margin-bottom:34px}
 <section id="skills">
   <div class="col">
     <div class="panel reveal"><b>F</b><span>Skills</span></div>
-    <h2 class="reveal">The <em>toolkit.</em></h2>
+    <h2 class="reveal">Skills &amp; <em>tools.</em></h2>
     <div class="kit reveal" style="margin-top:34px">
       <div class="row" style="--c:var(--blue)"><span class="k">Programming</span>
         <div class="items"><span>Python</span><span>SQL</span><span>C/C++</span><span>LaTeX</span></div></div>
@@ -573,19 +530,19 @@ footer .lede{margin-bottom:34px}
 
 <footer id="contact">
   <div class="col">
-    <h2 class="reveal">Let's find the <em>rare gems</em> together.</h2>
+    <h2 class="reveal">Get in <em>touch.</em></h2>
     <p class="lede reveal">Open to research collaborations, talks, and conversations about applied mathematics and ML for survey astronomy.</p>
     <div class="actions reveal" style="opacity:1;animation:none">
       <a class="lnk" href="mailto:bhutchin@upenn.edu">bhutchin@upenn.edu</a>
       <a class="lnk q" href="https://github.com/bradhutc" target="_blank" rel="noopener">github.com/bradhutc</a>
     </div>
     <div class="f-links reveal">
-      <span>University of Pennsylvania · Philadelphia, PA</span>
-      <a href="https://doi.org/10.3847/1538-3881/adf437" target="_blank" rel="noopener">Latest paper ↗</a>
+      <span>University of Pennsylvania | Philadelphia, PA</span>
+      <a href="https://doi.org/10.3847/1538-3881/adf437" target="_blank" rel="noopener">Latest paper</a>
     </div>
     <div class="f-bottom">
-      <span>© 2026 Bradley D. Hutchinson</span>
-      <span>One field of stars, five arrangements · blue for hot light, copper for cool</span>
+      <span>(c) 2026 Bradley D. Hutchinson</span>
+      <span>One field of stars, five arrangements | blue for hot light, copper for cool</span>
     </div>
   </div>
 </footer>
@@ -595,6 +552,49 @@ const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp = (x,a,b)=>Math.min(b,Math.max(a,x));
 const smooth = x => x*x*(3-2*x);
 const topOf = el => el.getBoundingClientRect().top + scrollY;   // position in the document
+
+/* ============================================================
+   A CHARACTER GRID ON A CANVAS
+   Every figure is drawn through this. add() piles up light in a
+   cell (more light, heavier glyph: . : + * # @); set()/text()/line()
+   place exact characters. flush() prints the grid.
+   ============================================================ */
+const MONO='"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace';
+function AsciiGrid(cv,fs){
+  const g={cv,ctx:cv.getContext('2d'),fs:fs||13,cols:0,rows:0};
+  g.resize=(W,H)=>{
+    const dpr=Math.min(devicePixelRatio||1,2), c=g.ctx; g.W=W; g.H=H;
+    cv.style.width=W+'px'; cv.style.height=H+'px'; cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    c.setTransform(dpr,0,0,dpr,0,0); c.font=g.fs+'px '+MONO; c.textBaseline='top';
+    g.cw=c.measureText('MMMMMMMMMM').width/10; g.ch=Math.round(g.fs*1.3);
+    g.cols=Math.ceil(W/g.cw); g.rows=Math.ceil(H/g.ch);
+    const n=g.cols*g.rows;
+    g.B=new Float32Array(n); g.R=new Float32Array(n); g.G=new Float32Array(n); g.L=new Float32Array(n);
+    g.K=new Uint16Array(n); g.KA=new Float32Array(n); g.KC=new Uint32Array(n);
+  };
+  g.clear=()=>{ g.B.fill(0); g.R.fill(0); g.G.fill(0); g.L.fill(0); g.K.fill(0); };
+  g.add=(x,y,b,c)=>{ const q=Math.floor(x/g.cw), r=Math.floor(y/g.ch); if(b<=0||q<0||r<0||q>=g.cols||r>=g.rows) return;
+    const i=r*g.cols+q; g.B[i]+=b; g.R[i]+=c[0]*b; g.G[i]+=c[1]*b; g.L[i]+=c[2]*b; };
+  g.setc=(q,r,chr,c,a)=>{ if(a<=.02||q<0||r<0||q>=g.cols||r>=g.rows) return; const i=r*g.cols+q; if(g.K[i]&&g.KA[i]>a) return;
+    g.K[i]=chr.charCodeAt(0); g.KA[i]=a; g.KC[i]=(c[0]<<16)|(c[1]<<8)|c[2]; };
+  g.set=(x,y,chr,c,a)=>g.setc(Math.floor(x/g.cw),Math.floor(y/g.ch),chr,c,a);
+  g.text=(x,y,s,c,a,align)=>{ let q=Math.floor(x/g.cw); const r=Math.floor(y/g.ch);
+    if(align==='center') q-=s.length>>1; else if(align==='right') q-=s.length-1;
+    for(let k=0;k<s.length;k++) if(s[k]!==' ') g.setc(q+k,r,s[k],c,a); };
+  g.line=(x0,y0,x1,y1,c,a,chr)=>{ const q0=x0/g.cw, r0=y0/g.ch, dq=x1/g.cw-q0, dr=y1/g.ch-r0;
+    const n=Math.max(1,Math.ceil(Math.max(Math.abs(dq),Math.abs(dr)))), aq=Math.abs(dq), ar=Math.abs(dr)*2;
+    const gl=chr||(aq<ar*.4?'|':aq>ar*2.5?'-':(dq*dr>0?'\\':'/'));
+    for(let k=0;k<=n;k++) g.setc(Math.floor(q0+dq*k/n),Math.floor(r0+dr*k/n),gl,c,a); };
+  g.flush=()=>{ const c=g.ctx, cols=g.cols; c.clearRect(0,0,g.W,g.H); let last='';
+    for(let r=0;r<g.rows;r++) for(let q=0;q<cols;q++){ const i=r*cols+q; let chr, st;
+      if(g.K[i]){ const k=g.KC[i]; chr=String.fromCharCode(g.K[i]); st='rgba('+(k>>16)+','+(k>>8&255)+','+(k&255)+','+(Math.min(1,g.KA[i])*20|0)/20+')'; }
+      else { const b=g.B[i]; if(b<.05) continue;
+        chr = b<.22?'.': b<.45?':': b<.8?'+': b<1.4?'*': b<2.4?'#':'@';
+        st='rgba('+(g.R[i]/b&~3)+','+(g.G[i]/b&~3)+','+(g.L[i]/b&~3)+','+(Math.min(1,.38+.62*b)*10|0)/10+')'; }
+      if(st!==last){ c.fillStyle=st; last=st; }
+      c.fillText(chr,q*g.cw,r*g.ch); } };
+  return g;
+}
 
 /* ---------- reveals ---------- */
 const io = new IntersectionObserver(es=>{
@@ -607,15 +607,13 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
    One population of stars. Each has a fixed color (its place on
    the blue-cream-copper ramp) and a fixed brightness. Scrolling
    moves every star between six arrangements of the same light.
-   In the first, the field is viewed one filter at a time, and
-   three stars can be pressed to show the shape of their light.
    ============================================================ */
 (function(){
-  const cv = document.getElementById('plate'), ctx = cv.getContext('2d');
+  const cv = document.getElementById('plate'), AG = AsciiGrid(cv,13);
+  const CREAM=[253,248,233], SOFTC=[171,167,157], FAINTC=[111,108,101], INKC=[244,239,228], WARM=[253,240,214];
   const capEl = document.getElementById('cap'), capN = document.getElementById('capN'), capT = document.getElementById('capT');
-  const scope = document.getElementById('scope');
   const CAPS = [
-    ['Plate I','A field of stars, one filter at a time.'],
+    ['Plate I','A field of stars.'],
     ['',''],   // (arrangement 1 is no longer shown)
     ['Plate II','The same stars, by color and brightness.'],
     ['Plate III','A spiral galaxy.'],
@@ -640,18 +638,12 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
   const R = ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
   const G = ()=>{let u=0,v=0;while(!u)u=R();v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(6.2832*v)};
 
-  /* five filters and a blackbody for each star */
-  const FN=['g','r','i','z','y'], LAM=[481,617,752,866,962];
-  const BAND=[[400,550],[550,690],[690,820],[820,920],[920,1040]];
-  const TINT=[[143,217,196],[244,176,106],[238,125,94],[208,96,138],[160,104,176]];
-  const planck=(l,T)=>Math.pow(l/500,-5)/(Math.exp(1.4388e7/(l*T))-1);
-  const tempOf=s=>3000+7500*Math.pow(1-s,1.6);
   /* globular clusters of the northern Galactic sky: name, l, b in degrees
      (positions from the Harris catalogue, converted to Galactic coordinates) */
   const GC=[['M3',42.21,78.71,1],['M53',332.97,79.76],['NGC 5466',42.15,73.59,1],['NGC 4147',252.85,77.19],
     ['M5',3.86,46.80],['M13',59.01,40.91],['M92',68.34,34.86],['M12',15.72,26.31],['M14',21.32,14.80],
     ['M107',3.37,23.01],['M4',350.97,15.97],['M68',299.63,36.05],['NGC 2419',180.37,25.24],['NGC 5897',342.95,30.29]];
-  const RP=.465;   // radius of the polar map: centre is b = +90°, rim is b = +2°
+  const RP=.465;   // radius of the polar map: centre is b = +90 deg, rim is b = +2 deg
   const polar=(l,b)=>{const rho=(90-b)/88*RP, a=l*Math.PI/180; return [.5-rho*Math.sin(a),.5+rho*Math.cos(a)]};
   let gcN=0, XS=[];
   // one position on the sky map: denser toward low latitude and toward the Galactic centre
@@ -665,13 +657,7 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
     }
     return [.5-RP*rr*Math.sin(l),.5+RP*rr*Math.cos(l)];
   }
-  const SPEC=[
-    {s:.03,a:1,  x:.30,y:.16,sz:2.6,name:'Hot star'},
-    {s:.463,a:.8,x:.71,y:.30,sz:1.9,name:'Sun-like star'},
-    {s:1.0,a:.62,x:.41,y:.46,sz:1.5,name:'Cool star'}
-  ];
-
-  let hdrH=0, fEnd=1;
+  let hdrH=0;
   let W,H,P=[],px=0,py=0,side=1,mobile=false,anchors=[],yc=0,curCap=-1,raf;
   let mx=0,my=0,tmx=0,tmy=0;
   addEventListener('pointermove',e=>{tmx=(e.clientX/innerWidth-.5);tmy=(e.clientY/innerHeight-.5)},{passive:true});
@@ -685,21 +671,15 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
       const pick=R(), q=R();
       let s = pick<.09 ? q*.30 : pick<.20 ? .30+q*.14 : pick<.57 ? clamp(.53+G()*.045,.44,.62) : .62+q*.38;
       let au = R();
-      const sp = i<3 ? SPEC[i] : null;
-      if(sp){ s=sp.s; au=Math.pow(sp.a,1/2.4); }
       const a = Math.pow(au,2.4);
-      const p = {s,a,field:R()<.13,ph:R()*6.283,d:R(),sw:(R()-.5),col:ramp(s),T:[],sz:sp?sp.sz:1,spec:sp?i:-1};
-      p.vr = !sp && (p.ph*997%1)<.07;   // the variable stars
-      const T=tempOf(s), fl=LAM.map(l=>planck(l,T)), fm=Math.max(...fl);
-      p.F=fl.map(v=>Math.pow(v/fm,.9));
+      const p = {s,a,field:R()<.13,ph:R()*6.283,d:R(),sw:(R()-.5),col:ramp(s),T:[],sz:1};
+      p.vr = (p.ph*997%1)<.07;   // the variable stars
       const r3=R(),r4=R(),r5=R(),g1=G(),g2=G(),th=R()*6.283;
       let x,y;
 
       /* I — a field of stars */
-      if(sp){ x=sp.x; y=sp.y; }
-      else if(mobile){ x=-.1+R()*1.2; y=-.45+R()*1.9; }
-      else if(R()<.6){ x=-.14+R()*1.28; y=-.16+R()*1.32; }
-      else{ x=-1.75+R()*2.95; y=-.35+R()*1.7; }
+      if(mobile){ x=-.1+R()*1.2; y=-.45+R()*1.9; }
+      else{ x=-1.1+R()*3.2; y=-.2+R()*1.4; }
       p.T.push([x,y]);
 
       /* II — color left to right, apparent brightness up: a cloud */
@@ -734,7 +714,7 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
       p.T.push([x,y]);
 
       /* VI — globular cluster, dense to the very centre */
-      if(p.field&&!sp){ x=-1.7+R()*2.9; y=-.35+R()*1.7; }
+      if(p.field){ x=-1.1+R()*3.2; y=-.35+R()*1.7; }
       else{ const u=R()*.99+.000004, r=Math.min(.58,.075/Math.sqrt(Math.pow(u,-2/3)-1)); x=.5+r*Math.cos(th); y=.5+r*Math.sin(th); }
       p.T.push([x,y]);
       P.push(p);
@@ -748,23 +728,13 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
     }
   }
 
-  const specBtns=[...document.querySelectorAll('.spec')];
   function layout(){
-    const dpr=Math.min(devicePixelRatio||1,2);
     W=innerWidth;H=innerHeight;
-    cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+    AG.resize(W,H);
     const wasMobile=mobile; mobile=W<=1040;
     if(!P.length||wasMobile!==mobile) makeStars();
-    buildSpectrum();
-    if(mobile){ side=Math.min(W*.96,H*.7); px=(W-side)/2; py=(H-side)/2; }
-    else{
-      const colR=document.querySelector('header .col').getBoundingClientRect().right;
-      const left=Math.max(colR+30,W*.55), right=W-28;
-      side=Math.min(right-left,H*.76);
-      px=left+(right-left-side)/2; py=(H-side)/2-10;
-      capEl.style.left=left+'px'; capEl.style.width=(right-left)+'px';
-      specBtns.forEach((b,i)=>{b.style.left=(px+SPEC[i].x*side)+'px';b.style.top=(py+SPEC[i].y*side)+'px'});
-    }
+    side = mobile ? Math.min(W*.96,H*.7) : Math.min(W*.9,H*.84);
+    px=(W-side)/2; py=(H-side)/2;
     const docH=document.documentElement.scrollHeight;
     anchors=ORDER.map(([id,k])=>{
       const el=document.getElementById(id);
@@ -772,7 +742,6 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
       if(id==='top'){ hdrH=el.offsetHeight; return {c:Math.max(H/2,hdrH-H/2),k,id}; }
       return {c:clamp(topOf(el)+el.offsetHeight/2,H/2,docH-H/2),k,id};
     });
-    fEnd=Math.max(1,anchors[1].c-H/2);   // the filters run from the top of the page to the middle of About
     placeAxis(docH);
   }
 
@@ -802,123 +771,6 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
     return {from:A.k,to:B.k,e:clamp((t-.06)/.88,0,1)};
   }
 
-  /* ---------- the long spectrum: wavelength runs down the page ----------
-     Three stars' light is drawn top to bottom, 400 to 1040 nm. A scan line sits at the
-     middle of the window; whichever filter it is inside is the one the field is seen through. */
-  const specEl=document.getElementById('spectrum'), L0=400, L1=1040, SVGN='http://www.w3.org/2000/svg';
-  let spH=0, spTop=0, spX=v=>v, spClip, spScan, spLab, spDots=[], spLines=[], spMax=[], spStage=6;
-  const sv=(par,n,at,txt)=>{const e=document.createElementNS(SVGN,n);for(const k in at)e.setAttribute(k,at[k]);if(txt!=null)e.textContent=txt;par.appendChild(e);return e};
-  function buildSpectrum(){
-    const w=specEl.clientWidth; spH=Math.round(H*(mobile?1.05:1.15));
-    specEl.innerHTML='';
-    const svg=sv(specEl,'svg',{width:w,height:spH,viewBox:`0 0 ${w} ${spH}`,role:'img','aria-label':'The light of a hot, a Sun-like and a cool star from 400 to 1040 nanometres, crossing the five filters g, r, i, z and y'});
-    const yOf=l=>(l-L0)/(L1-L0)*spH, xL=mobile?44:62, xR=w-6;
-    spX=v=>xL+(xR-xL)*(.05+.9*v);
-    const mono='JetBrains Mono,monospace', serif='Instrument Serif,Georgia,serif';
-    spClip=sv(sv(sv(svg,'defs',{}),'clipPath',{id:'spClip'}),'rect',{x:-20,y:-20,width:w+40,height:20});
-    sv(svg,'rect',{x:xL-12,y:0,width:xR-xL+12,height:spH,fill:'#030304','fill-opacity':.86});   // keep the field from showing through
-    // the five filters, stacked down the page
-    BAND.forEach((b,i)=>{
-      const y0=yOf(b[0]), y1=yOf(b[1]), c=`rgb(${TINT[i]})`;
-      sv(svg,'rect',{x:xL,y:y0+1,width:xR-xL,height:y1-y0-2,fill:c,'fill-opacity':.05});
-      sv(svg,'line',{x1:xL,y1:y0,x2:xR,y2:y0,stroke:c,'stroke-opacity':.5});
-      sv(svg,'text',{x:xR-10,y:y1-14,'text-anchor':'end',fill:c,'fill-opacity':.3,'font-size':Math.min(mobile?90:120,(y1-y0)*.62),'font-style':'italic','font-family':serif},FN[i]);
-      sv(svg,'text',{x:xR-10,y:y0+20,'text-anchor':'end',fill:c,'font-size':10,'letter-spacing':'.14em','font-family':mono},`FILTER ${FN[i]} · ${b[0]}–${b[1]} NM`);
-    });
-    sv(svg,'line',{x1:xL,y1:spH,x2:xR,y2:spH,stroke:'#3A3832'});
-    // wavelength axis
-    sv(svg,'line',{x1:xL-12,y1:0,x2:xL-12,y2:spH,stroke:'#3A3832'});
-    for(let l=400;l<=1000;l+=50){ const y=yOf(l);
-      sv(svg,'line',{x1:xL-12,y1:y,x2:xL-(l%100?8:5),y2:y,stroke:'#6F6C65'});
-      if(l%100===0) sv(svg,'text',{x:xL-18,y:y+3,'text-anchor':'end',fill:'#6F6C65','font-size':9.5,'font-family':mono},l);
-    }
-    sv(svg,'text',{x:xL-18,y:-14,'text-anchor':'end',fill:'#6F6C65','font-size':9.5,'font-family':mono},'nm');
-    // three stars: a faint full curve, and a bright one revealed down to the scan line
-    const drawn=sv(svg,'g',{'clip-path':'url(#spClip)'});
-    spLines=[]; spMax=[]; spDots=[];
-    SPEC.forEach((sp,k)=>{
-      const T=tempOf(sp.s), pts=[]; let m=0;
-      for(let l=L0;l<=L1;l+=4){const v=planck(l,T);pts.push([l,v]);if(v>m)m=v;}
-      spMax.push(m);
-      const d=pts.map((q,i)=>(i?'L':'M')+spX(q[1]/m).toFixed(1)+' '+yOf(q[0]).toFixed(1)).join(''), c=`rgb(${ramp(sp.s)})`;
-      sv(svg,'path',{d,fill:'none',stroke:c,'stroke-opacity':.16,'stroke-width':1.2});
-      spLines.push(sv(drawn,'path',{d,fill:'none',stroke:c,'stroke-width':2,'stroke-linecap':'round'}));
-      LAM.forEach((l,i)=>sv(drawn,'circle',{cx:spX(planck(l,T)/m),cy:yOf(l),r:3.4,fill:`rgb(${TINT[i]})`,stroke:'#030304','stroke-width':1.2}));
-      sv(svg,'path',{d,fill:'none',stroke:'transparent','stroke-width':22,class:'hit'}).addEventListener('click',()=>selectStar(k));
-      const x0=spX(pts[0][1]/m);
-      sv(svg,'text',{x:clamp(x0,xL+26,xR-30),y:-14,'text-anchor':'middle',fill:c,'font-size':10,'letter-spacing':'.14em','font-family':mono},sp.name.replace(' star','').toUpperCase());
-    });
-    // scan line
-    spScan=sv(svg,'g',{});
-    sv(spScan,'line',{x1:xL-12,y1:0,x2:xR,y2:0,stroke:'#FDF8E9','stroke-opacity':.55,'stroke-dasharray':'2 5'});
-    spLab=sv(spScan,'text',{x:xL+8,y:-8,fill:'#FDF8E9','font-size':10.5,'letter-spacing':'.1em','font-family':mono},'');
-    SPEC.forEach(sp=>spDots.push(sv(spScan,'circle',{cy:0,r:5.5,fill:`rgb(${ramp(sp.s)})`,stroke:'#030304','stroke-width':1.5})));
-    spTop=topOf(svg);
-    markCurves();
-  }
-  function markCurves(){ spLines.forEach((l,k)=>{l.setAttribute('stroke-width',k===sel?3.2:1.6);l.setAttribute('stroke-opacity',k===sel?1:.6)}); }
-  function updateSpectrum(){
-    const raw=scrollY+H*.5-spTop, sy=clamp(raw,0,spH), lam=L0+sy/spH*(L1-L0);
-    spStage = raw<0 ? 6 : raw>=spH ? 5 : Math.max(0,BAND.findIndex(b=>lam<b[1]));
-    if(sy===spScan._y) return; spScan._y=sy;
-    spClip.setAttribute('height',sy+20);
-    spScan.setAttribute('transform',`translate(0 ${sy.toFixed(1)})`);
-    spScan.setAttribute('opacity',raw<0||raw>=spH?0:1);
-    spLab.textContent=Math.round(lam)+' NM';
-    SPEC.forEach((sp,k)=>spDots[k].setAttribute('cx',spX(planck(lam,tempOf(sp.s))/spMax[k])));
-  }
-
-  /* ---------- filters ---------- */
-  const fBtns=[...document.querySelectorAll('#filters button')];
-  // states: 0-4 = g r i z y, 5 = all five in color, 6 = white light (no filter)
-  const SEQ=[6,0,1,2,3,4,5];
-  const wv=[0,0,0,0,0,0,1]; let pinned=-1, fCur=6, fShown=-1;
-  fBtns.forEach(b=>b.addEventListener('click',()=>{ const i=+b.dataset.f; pinned = pinned===i ? -1 : i; }));
-  function showFilter(i){
-    fShown=i; fBtns.forEach(b=>{const on=+b.dataset.f===i;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
-    document.querySelectorAll('#sed .band').forEach((r,j)=>r.setAttribute('fill-opacity',j===i?.2:.055));
-  }
-
-  /* ---------- the three stars and their light ---------- */
-  const NS='http://www.w3.org/2000/svg', sed=document.getElementById('sed');
-  const X=l=>12+296*(l-390)/(1050-390), Y=v=>116-90*v;
-  const mk=(n,at)=>{const e=document.createElementNS(NS,n);for(const k in at)e.setAttribute(k,at[k]);sed.appendChild(e);return e};
-  BAND.forEach((b,i)=>{
-    mk('rect',{class:'band',x:X(b[0]),y:22,width:X(b[1])-X(b[0])-1.5,height:94,fill:`rgb(${TINT[i]})`,'fill-opacity':.055});
-    mk('text',{x:(X(b[0])+X(b[1]))/2,y:15,'text-anchor':'middle',fill:`rgb(${TINT[i]})`,'font-size':12,'font-style':'italic','font-family':'Instrument Serif,Georgia,serif'}).textContent=FN[i];
-  });
-  mk('line',{x1:12,y1:116,x2:308,y2:116,stroke:'#3A3832'});
-  mk('text',{x:12,y:132,fill:'#6F6C65','font-size':9,'font-family':'JetBrains Mono,monospace'}).textContent='400 nm';
-  mk('text',{x:308,y:132,'text-anchor':'end',fill:'#6F6C65','font-size':9,'font-family':'JetBrains Mono,monospace'}).textContent='1000 nm';
-  mk('text',{x:160,y:132,'text-anchor':'middle',fill:'#6F6C65','font-size':9,'font-family':'JetBrains Mono,monospace'}).textContent='wavelength →';
-  const curve=mk('path',{fill:'none','stroke-width':2,'stroke-linecap':'round'});
-  const dots=LAM.map((l,i)=>mk('circle',{r:3.6,fill:`rgb(${TINT[i]})`,stroke:'#030304','stroke-width':1.2}));
-  function drawSED(s){
-    const T=tempOf(s), pts=[]; let m=0;
-    for(let l=390;l<=1050;l+=10){const v=planck(l,T);pts.push([l,v]);if(v>m)m=v;}
-    curve.setAttribute('d',pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]/m).toFixed(1)).join(''));
-    curve.setAttribute('stroke',`rgb(${ramp(s)})`);
-    LAM.forEach((l,i)=>{dots[i].setAttribute('cx',X(l));dots[i].setAttribute('cy',Y(planck(l,T)/m))});
-  }
-  const sBtns=[...document.querySelectorAll('#stars button')], sedName=document.getElementById('sedName');
-  let sel=0, sNow=SPEC[0].s, sTween=null;
-  function selectStar(i){
-    sel=i;
-    sBtns.forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-pressed',j===i)});
-    specBtns.forEach((b,j)=>b.classList.toggle('on',j===i));
-    markCurves();
-    const T=Math.round(tempOf(SPEC[i].s)/100)*100;
-    sedName.textContent=SPEC[i].name+' · about '+T.toLocaleString('en-US')+' K';
-    const s0=sNow, s1=SPEC[i].s, t0=performance.now();
-    cancelAnimationFrame(sTween);
-    if(REDUCE){ sNow=s1; drawSED(s1); return; }
-    (function step(now){ const k=clamp((now-t0)/650,0,1); sNow=s0+(s1-s0)*smooth(k); drawSED(sNow); if(k<1) sTween=requestAnimationFrame(step); })(t0);
-  }
-  sBtns.forEach((b,i)=>b.addEventListener('click',()=>selectStar(i)));
-  specBtns.forEach((b,i)=>b.addEventListener('click',()=>selectStar(i)));
-  drawSED(sNow); selectStar(0);
-
-  let heroOn=null, scopeO=-1;
   function frame(now){
     const t=now/1000, target=scrollY+H/2;
     yc = REDUCE ? target : yc+(target-yc)*.07;
@@ -927,105 +779,58 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
     const ox=px-mx*14, oy=py-my*14;
     const wOf = i => (st.from===i?1-st.e:0)+(st.to===i?st.e:0);
     const w0=smooth(clamp(wOf(0)*1.25-.25,0,1));
-
-    ctx.globalCompositeOperation='source-over';
-    ctx.clearRect(0,0,W,H);
+    const g=AG, cw=g.cw, ch=g.ch;
+    g.clear();
 
     // which plate are we on
     const k = st.e>.5?st.to:st.from;
     if(k!==curCap){ curCap=k; capEl.style.opacity=0;
       setTimeout(()=>{capN.textContent=CAPS[k][0];capT.textContent=CAPS[k][1];capEl.style.opacity=1},REDUCE?0:260); }
 
-    // scrolling turns the filter wheel: white light, then g, r, i, z, y, then all five in color
-    const hp = clamp(scrollY/fEnd,0,1);
-    fCur = pinned>=0 ? pinned : spStage;
-    updateSpectrum();
-    if(fCur!==fShown) showFilter(fCur);
-    for(let b=0;b<7;b++) wv[b]+=((b===fCur?1:0)-wv[b])*(REDUCE?1:.07);
-    const famt=(1-wv[5])*w0;
-    let tr=255,tg=255,tb=255;
-    if(famt>.004){ let a0=wv[6]*255,a1=a0,a2=a0;
-      for(let b=0;b<5;b++){a0+=wv[b]*(127+.5*TINT[b][0]);a1+=wv[b]*(127+.5*TINT[b][1]);a2+=wv[b]*(127+.5*TINT[b][2]);}
-      const n=Math.max(.001,1-wv[5]); tr=a0/n; tg=a1/n; tb=a2/n; }
-
-    if(!mobile){
-      const on=w0>.5;
-      if(on!==heroOn){ heroOn=on; specBtns.forEach(b=>b.classList.toggle('live',on)); }
-      // name of the filter in view
-      if(w0>.02){
-        ctx.textAlign='left';
-        for(let b=0;b<7;b++){ if(wv[b]<.02) continue;
-          const c=b<5?TINT[b]:[253,248,233];
-          ctx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${wv[b]*w0})`;
-          ctx.font='italic 46px "Instrument Serif",Georgia,serif';
-          ctx.fillText(b<5?FN[b]:b===5?'all':'white',ox+side*.0,oy+side*.03+30);
-          ctx.font='10.5px "JetBrains Mono",monospace';
-          ctx.fillStyle=`rgba(171,167,157,${wv[b]*w0})`;
-          ctx.fillText(b<5?('FILTER · '+LAM[b]+' NM'):b===5?'FIVE FILTERS TOGETHER':'NO FILTER',ox+side*.0,oy+side*.03+50);
-        }
-      }
-    }
-
     // unresolved light at the centre of the cluster and the galaxy
     const gC=wOf(5), gG=wOf(3), glow=Math.max(gC,gG);
     if(glow>.02){
-      const cx=ox+side/2, cy=oy+side/2;
-      ctx.globalCompositeOperation='lighter';
-      let g=ctx.createRadialGradient(cx,cy,0,cx,cy,side*.32);
-      g.addColorStop(0,`rgba(253,240,214,${.3*gC+.22*gG})`); g.addColorStop(.3,`rgba(240,200,150,${.11*gC+.07*gG})`); g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=g; ctx.fillRect(ox,oy,side,side);
-      if(gC>.02){ g=ctx.createRadialGradient(cx,cy,0,cx,cy,side*.1);
-        g.addColorStop(0,`rgba(255,248,230,${.75*gC})`); g.addColorStop(.4,`rgba(253,236,205,${.3*gC})`); g.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.fillStyle=g; ctx.fillRect(cx-side*.1,cy-side*.1,side*.2,side*.2); }
-      ctx.globalCompositeOperation='source-over';
+      const cx=ox+side/2, cy=oy+side/2, R1=side*.32;
+      for(let y=cy-R1;y<cy+R1;y+=ch) for(let x=cx-R1;x<cx+R1;x+=cw){
+        const d=Math.hypot(x-cx,y-cy)/R1; if(d>=1) continue;
+        let v=(1-d)*(1-d)*(.5*gC+.36*gG); if(gC>.02&&d<.31) v+=(1-d/.31)*1.5*gC;
+        g.add(x,y,v,WARM); }
     }
 
     // axes, drawn only for the arrangements that are plots
     if(!mobile){
       const w1=wOf(1), w2=wOf(2), w4=wOf(4), wax=Math.max(w1,w2);
       if(wax>.02){
-        ctx.strokeStyle=`rgba(171,167,157,${.5*wax})`; ctx.lineWidth=1; ctx.beginPath();
-        const x0=ox+side*.04,y0=oy+side*.04,x1=ox+side*.96,y1=oy+side*.96;
-        ctx.moveTo(x0,y0);ctx.lineTo(x0,y1);ctx.lineTo(x1,y1);
-        for(let i=1;i<=8;i++){const u=i/8; ctx.moveTo(x0+(x1-x0)*u,y1);ctx.lineTo(x0+(x1-x0)*u,y1+5); ctx.moveTo(x0,y1-(y1-y0)*u);ctx.lineTo(x0-5,y1-(y1-y0)*u);}
-        ctx.stroke();
-        ctx.textAlign='center'; ctx.font='italic 19px "Instrument Serif",Georgia,serif';
-        const lab=(w,lx,ly)=>{ if(w<.02) return; ctx.fillStyle=`rgba(244,239,228,${.8*w})`;
-          ctx.fillText(lx,(x0+x1)/2,y1+28); ctx.save();ctx.translate(x0-18,(y0+y1)/2);ctx.rotate(-Math.PI/2);ctx.fillText(ly,0,0);ctx.restore(); };
+        const x0=ox+side*.04,y0=oy+side*.04,x1=ox+side*.96,y1=oy+side*.96, a=.6*wax;
+        g.line(x0,y0,x0,y1,SOFTC,a,'|'); g.line(x0,y1,x1,y1,SOFTC,a,'-');
+        for(let i=1;i<=8;i++){ const u=i/8; g.set(x0+(x1-x0)*u,y1,'+',SOFTC,a+.1); g.set(x0,y1-(y1-y0)*u,'+',SOFTC,a+.1); }
+        g.set(x0,y1,'+',SOFTC,a+.2);
+        const lab=(w,lx,ly)=>{ if(w<.02) return;
+          g.text((x0+x1)/2,y1+ch*1.6,lx+' ->',INKC,.85*w,'center'); g.text(x0+cw*2,y0-ch*.4,'^ '+ly,INKC,.85*w); };
         lab(w1,'S','A'); lab(w2,'color','brightness');
       }
       if(w4>.02){
-        ctx.strokeStyle=`rgba(171,167,157,${.3*w4})`; ctx.lineWidth=1;
         const cx=ox+side/2, cy=oy+side/2;
-        for(const r of [.155,.31,.465]){ctx.beginPath();ctx.arc(cx,cy,side*r,0,6.283);ctx.stroke();}
-        ctx.beginPath();ctx.moveTo(cx-side*.465,cy);ctx.lineTo(cx+side*.465,cy);ctx.moveTo(cx,cy-side*.465);ctx.lineTo(cx,cy+side*.465);ctx.stroke();
-        ctx.fillStyle=`rgba(171,167,157,${.75*w4})`; ctx.font='10px "JetBrains Mono",monospace'; ctx.textAlign='center';
-        ctx.fillText('180°',cx,cy-side*.465-8); ctx.fillText('0°',cx,cy+side*.465+16);
-        ctx.fillText('90°',cx-side*.465-16,cy+3); ctx.fillText('270°',cx+side*.465+18,cy+3);
-        ctx.fillStyle=`rgba(111,108,101,${w4})`; ctx.font='9px "JetBrains Mono",monospace'; ctx.textAlign='left';
-        ctx.fillText('+60°',cx+side*.155*.707+3,cy-side*.155*.707-3); ctx.fillText('+30°',cx+side*.31*.707+3,cy-side*.31*.707-3);
+        for(const r of [.155,.31,.465]){ const n=Math.ceil(6.283*side*r/cw);
+          for(let q=0;q<n;q+=2){ const a=q/n*6.283; g.set(cx+Math.cos(a)*side*r,cy+Math.sin(a)*side*r,'.',SOFTC,.4*w4); } }
+        g.line(cx-side*.465,cy,cx+side*.465,cy,FAINTC,.3*w4,'-'); g.line(cx,cy-side*.465,cx,cy+side*.465,FAINTC,.3*w4,'|');
+        g.text(cx,cy-side*.465-ch*1.4,'180',SOFTC,.8*w4,'center'); g.text(cx,cy+side*.465+ch*.6,'0',SOFTC,.8*w4,'center');
+        g.text(cx-side*.465-cw*2,cy,'90',SOFTC,.8*w4,'right'); g.text(cx+side*.465+cw*2,cy,'270',SOFTC,.8*w4);
+        g.text(cx+side*.155*.707+cw,cy-side*.155*.707-ch,'+60',FAINTC,w4); g.text(cx+side*.31*.707+cw,cy-side*.31*.707-ch,'+30',FAINTC,w4);
         // the clusters: a small glow
-        for(const c of GC){
-          const q=polar(c[1],c[2]), gx=ox+q[0]*side, gy=oy+q[1]*side;
-          ctx.globalCompositeOperation='lighter';
-          const g=ctx.createRadialGradient(gx,gy,0,gx,gy,9);
-          g.addColorStop(0,`rgba(253,240,214,${.5*w4})`); g.addColorStop(1,'rgba(0,0,0,0)');
-          ctx.fillStyle=g; ctx.fillRect(gx-9,gy-9,18,18);
-          ctx.globalCompositeOperation='source-over';
-        }
+        for(const c of GC){ const q=polar(c[1],c[2]); g.add(ox+q[0]*side,oy+q[1]*side,.55*w4,WARM); }
       }
     }
 
-    const w4s=wOf(4), shrink=1-.38*w4s, calm=Math.min(1,wOf(0)+wOf(1)+wOf(2)+w4s);   // smaller stars on the sky map, so the clusters read
-    ctx.globalCompositeOperation='lighter';
+    const w4s=wOf(4), shrink=1-.38*w4s, calm=Math.min(1,wOf(0)+wOf(1)+wOf(2)+w4s);   // fainter stars on the sky map, so the clusters read
     if(w4s>.02){
       const ap=smooth(clamp(w4s*1.6-.6,0,1));
       for(const q of XS){
-        const tw=(REDUCE||!q.vr)?.78:.5+.5*Math.sin(t*(1.1+q.d*2.6)+q.ph), r=.38+q.a*.9;
-        ctx.globalAlpha=(.22+q.a*.7)*tw*ap; ctx.fillStyle=`rgb(${q.col[0]},${q.col[1]},${q.col[2]})`;
-        ctx.fillRect(ox+q.x*side-r,oy+q.y*side-r,r*2,r*2);
+        const tw=(REDUCE||!q.vr)?.78:.5+.5*Math.sin(t*(1.1+q.d*2.6)+q.ph);
+        g.add(ox+q.x*side,oy+q.y*side,(.22+q.a*.7)*tw*ap*(.3+.45*q.a),q.col);
       }
     }
+    const tc=[0,0,0];
     for(const p of P){
       const a=p.T[st.from], b=p.T[st.to];
       let x,y;
@@ -1046,32 +851,14 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
           fl=Math.pow(Math.max(0,Math.sin(t*(.35+p.d*.5)+p.ph*3)),24)*(1-calm);
           tw=Math.min(1,tw+fl*.6); tw+=(.85-tw)*calm; }
       }
-      let bf=1, c0=p.col[0], c1=p.col[1], c2=p.col[2];
-      if(famt>.004){
-        let f=wv[5]+wv[6]; for(let q=0;q<5;q++) f+=wv[q]*p.F[q];
-        bf=1+(f-1)*w0; const m=famt*(.85+.15*wv[6]);
-        c0+=(tr-c0)*m; c1+=(tg-c1)*m; c2+=(tb-c2)*m;
-      }
+      const bf=1, c0=p.col[0], c1=p.col[1], c2=p.col[2];
       const big=1+(p.sz-1)*w0;
       const r=(.55+p.a*1.9)*big*(.6+.4*bf)*shrink*(.82+.22*tw+.45*fl*shrink), al=.08+.92*bf;
-      ctx.fillStyle=`rgb(${c0|0},${c1|0},${c2|0})`;
-      if(p.a>.55){
-        ctx.globalAlpha=.07*tw*al; ctx.beginPath(); ctx.arc(x,y,r*2.8,0,6.283); ctx.fill();
-        ctx.globalAlpha=tw*al; ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fill();
-      } else {
-        ctx.globalAlpha=(.3+p.a*1.1)*tw*al; ctx.fillRect(x-r*.75,y-r*.75,r*1.5,r*1.5);
-      }
-      if(p.spec>=0&&w0>.02){
-        // diffraction spikes and a ring: these three can be pressed
-        const L=r*4.2; ctx.globalAlpha=.45*w0*al; ctx.strokeStyle=ctx.fillStyle; ctx.lineWidth=.9;
-        ctx.beginPath(); ctx.moveTo(x-L,y);ctx.lineTo(x+L,y);ctx.moveTo(x,y-L);ctx.lineTo(x,y+L); ctx.stroke();
-        if(!mobile){ const on=p.spec===sel;
-          ctx.globalAlpha=(on?.9:.4)*w0; ctx.strokeStyle=on?'#FDF8E9':'#ABA79D'; ctx.lineWidth=on?1.3:1;
-          if(!on) ctx.setLineDash([3,5]);
-          ctx.beginPath(); ctx.arc(x,y,22+(on&&!REDUCE?Math.sin(t*2.4)*1.5:0),0,6.283); ctx.stroke(); ctx.setLineDash([]); }
-      }
+      tc[0]=c0; tc[1]=c1; tc[2]=c2;
+      // more light in a cell means a heavier glyph
+      g.add(x,y,(p.a>.55 ? tw*al : (.3+p.a*1.1)*tw*al)*clamp(r/1.7,.28,1.7),tc);
     }
-    ctx.globalAlpha=1;
+    g.flush();
     raf=requestAnimationFrame(frame);
   }
 
@@ -1085,26 +872,26 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
 })();
 
 /* ============================================================
-   THE MODEL: 5 → 4 → 3 → 2 → 3 → 4 → 5
-   Pulses flow through the gated state autoencoder; on hover the
-   gates open and close each passband independently.
+   THE MODEL: 5 -> 4 -> 3 -> 2 -> 3 -> 4 -> 5
+   Drawn in characters. Pulses flow through the gated state autoencoder;
+   on hover the gates open and close each passband independently.
    ============================================================ */
 (function(){
   const cv=document.getElementById('gsa'), card=document.getElementById('pubcard');
   if(!cv||!card) return;
-  const ctx=cv.getContext('2d');
+  const GG=AsciiGrid(cv,12);
   const LAYERS=[5,4,3,2,3,4,5];
-  const BANDS=['#6686CC','#A1BEEE','#FDF8E9','#F0C998','#C38A6B'];
-  const INNER='#7D796F', BOTTLE='#FDF8E9';
+  const BANDS=[[102,134,204],[161,190,238],[253,248,233],[240,201,152],[195,138,107]];
+  const INNER=[150,146,134], BOTTLE=[253,248,233], WIRE=[253,248,233], PULSE=[217,211,196];
   let W=640,H=240,nodes=[],raf=null,running=false,gAmt=0,hovering=false;
   const gw=[1.6,2.6,1.2,3.2,2.0], gp=[0,2.1,4.0,1.2,3.3];
-  const ARCS=[{a:1,b:5,col:'124,158,226',lift:44},{a:2,b:4,col:'231,179,135',lift:24}];
+  const ARCS=[{a:1,b:5,col:[124,158,226],lift:44},{a:2,b:4,col:[231,179,135],lift:24}];
 
   function build(){
-    const dpr=Math.min(devicePixelRatio||1,2);
-    W=cv.clientWidth||640; H=Math.max(215,Math.min(250,W*.4));
-    cv.style.height=H+'px'; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
-    const padX=Math.max(26,W*.07), sp=Math.min(32,(H-80)/4);
+    const box=cv.parentElement, cs=getComputedStyle(box);
+    W=Math.max(240,box.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)); H=Math.max(215,Math.min(250,W*.4));
+    GG.resize(W,H);
+    const padX=Math.max(26,W*.07), sp=GG.ch*2;
     nodes=LAYERS.map((n,L)=>{
       const x=padX+L*(W-2*padX)/(LAYERS.length-1);
       return Array.from({length:n},(_,j)=>({x,y:H/2+18+(j-(n-1)/2)*sp}));
@@ -1112,29 +899,21 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
   }
   const T=3.4, SD=.135, easeIO=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
   const gate=(i,t)=>1+((.06+.94*(.5+.5*Math.sin(t*gw[i]+gp[i])))-1)*gAmt;
-  function style(L,j){
-    if(L===0||L===6) return {color:BANDS[j],r:5.6};
-    if(L===3) return {color:BOTTLE,r:5.4};
-    return {color:INNER,r:4.2};
-  }
   const qp=(p0,c,p1,q)=>{const u=1-q;return{x:u*u*p0.x+2*u*q*c.x+q*q*p1.x,y:u*u*p0.y+2*u*q*c.y+q*q*p1.y}};
 
   function draw(now){
-    const t=now/1000; gAmt+=((hovering?1:0)-gAmt)*.12;
-    const tw=(t%T)/T; ctx.clearRect(0,0,W,H);
-    ctx.lineWidth=1; ctx.strokeStyle='rgba(253,248,233,0.075)';
-    for(let L=0;L<6;L++) for(const a of nodes[L]) for(const b of nodes[L+1]){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+    const t=now/1000, g=GG; gAmt+=((hovering?1:0)-gAmt)*.12;
+    const tw=(t%T)/T; g.clear();
+    for(let L=0;L<6;L++) for(const a of nodes[L]) for(const b of nodes[L+1]) g.line(a.x,a.y,b.x,b.y,WIRE,.16);
 
     for(const arc of ARCS){
-      const p0={x:nodes[arc.a][0].x,y:nodes[arc.a][0].y-11}, p1={x:nodes[arc.b][0].x,y:nodes[arc.b][0].y-11};
-      const c={x:(p0.x+p1.x)/2,y:Math.min(p0.y,p1.y)-arc.lift};
-      ctx.strokeStyle=`rgba(${arc.col},.65)`; ctx.lineWidth=1.3; ctx.setLineDash([4,5]); ctx.lineDashOffset=REDUCE?0:-t*14;
-      ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.quadraticCurveTo(c.x,c.y,p1.x,p1.y); ctx.stroke(); ctx.setLineDash([]);
-      const apex=qp(p0,c,p1,.5);
-      ctx.font='10px "JetBrains Mono",monospace'; ctx.textAlign='center'; ctx.fillStyle=`rgba(${arc.col},.95)`;
-      ctx.fillText('h, c',apex.x,apex.y-5);
+      const p0={x:nodes[arc.a][0].x,y:nodes[arc.a][0].y-g.ch}, p1={x:nodes[arc.b][0].x,y:nodes[arc.b][0].y-g.ch};
+      const c={x:(p0.x+p1.x)/2,y:Math.min(p0.y,p1.y)-arc.lift*1.6};
+      const n=Math.ceil((p1.x-p0.x)/g.cw), ph=REDUCE?0:Math.floor(t*6);
+      for(let k=0;k<=n;k++){ if((k+n*8-ph)%3===0) continue; const pt=qp(p0,c,p1,k/n); g.set(pt.x,pt.y,':',arc.col,.75); }
+      const apex=qp(p0,c,p1,.5); g.text(apex.x,apex.y-g.ch,'h, c',arc.col,1,'center');
       if(!REDUCE){ const dep=arc.a*SD, arr=arc.b*SD;
-        if(tw>dep&&tw<arr){ const pt=qp(p0,c,p1,easeIO((tw-dep)/(arr-dep))); ctx.fillStyle=`rgba(${arc.col},1)`; ctx.beginPath(); ctx.arc(pt.x,pt.y,2.6,0,7); ctx.fill(); } }
+        if(tw>dep&&tw<arr){ const pt=qp(p0,c,p1,easeIO((tw-dep)/(arr-dep))); g.set(pt.x,pt.y,'@',arc.col,1.2); } }
     }
     if(!REDUCE){
       for(let s=0;s<6;s++){
@@ -1142,25 +921,22 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
         const p=easeIO((tw-st0)/SD);
         for(let ai=0;ai<nodes[s].length;ai++){ const a=nodes[s][ai];
           for(let bi=0;bi<nodes[s+1].length;bi++){ const b=nodes[s+1][bi];
-            let col, alpha=.75*Math.sin(p*Math.PI);
-            if(s===0){col=BANDS[ai];alpha*=gate(ai,t)} else if(s===5){col=BANDS[bi];alpha*=gate(bi,t)} else {col='#D9D3C4';alpha*=.7}
-            ctx.globalAlpha=alpha; ctx.fillStyle=col; ctx.beginPath(); ctx.arc(a.x+(b.x-a.x)*p,a.y+(b.y-a.y)*p,1.9,0,7); ctx.fill();
+            let col, alpha=.3+.7*Math.sin(p*Math.PI);
+            if(s===0){col=BANDS[ai];alpha*=gate(ai,t)} else if(s===5){col=BANDS[bi];alpha*=gate(bi,t)} else {col=PULSE;alpha*=.8}
+            g.set(a.x+(b.x-a.x)*p,a.y+(b.y-a.y)*p,'*',col,alpha);
           } }
       }
-      ctx.globalAlpha=1;
     }
     const act=L=>{ if(REDUCE) return 0; let d=tw-L*SD; if(d<0)d+=1; return Math.max(0,1-d/.14) };
     for(let L=0;L<7;L++){ const aL=act(L);
       for(let j=0;j<nodes[L].length;j++){
-        const n=nodes[L][j], st=style(L,j); let g=1; const base=(L===0||L===6||L===3)?1:.65;
-        if(L===0) g=gate(j,t); if(L===6) g=.3+.7*gate(j,t);
-        const r=st.r*(.7+.3*g)*(1+aL*.24), alpha=base*(.2+.8*g);
-        ctx.fillStyle=st.color;
-        ctx.globalAlpha=alpha*(.2+aL*.35); ctx.beginPath(); ctx.arc(n.x,n.y,r*2.8,0,7); ctx.fill();
-        ctx.globalAlpha=alpha; ctx.beginPath(); ctx.arc(n.x,n.y,r,0,7); ctx.fill();
-        if(L===3){ ctx.globalAlpha=.6+aL*.4; ctx.strokeStyle=BOTTLE; ctx.lineWidth=1.2; ctx.beginPath(); ctx.arc(n.x,n.y,r+3.6,0,7); ctx.stroke(); }
+        const n=nodes[L][j], outer=L===0||L===6, mid=L===3; let gt=1;
+        if(L===0) gt=gate(j,t); if(L===6) gt=.3+.7*gate(j,t);
+        const col=outer?BANDS[j]:mid?BOTTLE:INNER, a=Math.min(1.5,(outer||mid?1:.7)*(.25+.75*gt)*(.8+.5*aL)+.25);
+        const q=Math.floor(n.x/g.cw), r=Math.floor(n.y/g.ch);
+        g.setc(q-1,r,mid?'<':'(',col,a); g.setc(q,r,mid?'#':outer?(gt>.5?'O':'o'):(aL>.3?'O':'o'),col,a+.2); g.setc(q+1,r,mid?'>':')',col,a);
       } }
-    ctx.globalAlpha=1;
+    g.flush();
     if(running&&!REDUCE) raf=requestAnimationFrame(draw);
   }
   function startStop(on){
@@ -1175,7 +951,9 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(
   card.addEventListener('focusin',()=>hovering=true);
   card.addEventListener('focusout',()=>hovering=false);
   cv.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')hovering=!hovering});
-  addEventListener('resize',()=>{build();if(REDUCE)draw(0)});
+  const rebuild=()=>{build();if(REDUCE)draw(0)};
+  addEventListener('resize',rebuild);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(rebuild);
 })();
 </script>
 </body>
